@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>無尾熊離家記</title>
-<link rel="apple-touch-icon" sizes="180x180" href="icon.png"><link rel="icon" type="image/png" href="icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="無尾熊離家記">
+<link rel="apple-touch-icon" sizes="180x180" href="icon.png"><link rel="icon" href="favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png"><link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="無尾熊離家記">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap">
 <style>
 /* 版面概念：簡約的手機行程本。單欄卡片、類型以小標籤區分，色票取自日本傳統色（生成り、墨、茜、藍、萌黄、躑躅、朽葉、藤）。 */
@@ -391,6 +391,20 @@ button:active,.btn:active,.nv:active,.mini:active{transform:scale(.95)}
 #pv-pages{flex:1;overflow:auto;display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px 16px calc(24px + env(safe-area-inset-bottom,0px))}
 #pv-pages canvas{max-width:100%;background:#fff;border-radius:8px;box-shadow:0 4px 14px var(--shadow)}
 .pv-msg{padding:40px 0;color:var(--ink2);text-align:center}
+.gmbox{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;background:var(--ai-t);border:1px solid var(--line)}
+.gmh{display:flex;align-items:center;gap:6px;color:var(--ai)}
+.gmh b{font-size:14px}
+.gmsteps{margin:0;padding-left:20px;font-size:12.5px;line-height:1.6;color:var(--ink2)}
+.gmbox textarea{width:100%;min-height:52px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);resize:vertical;font-size:14px}
+.gmbox .mini{align-self:flex-start}
+.gmres{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px;padding:8px 10px;border-radius:10px;font-size:13px;line-height:1.5}
+.gmres.ok{background:var(--matcha-t);color:var(--ink)}
+.gmres.ok .ic{color:var(--matcha);flex:none;margin-top:2px}
+.gmres.bad{background:var(--kin-t);color:var(--ink)}
+.gmres>span{flex:1;min-width:0}
+.gmres small{flex-basis:100%;color:var(--ink2)}
+.gmmap{border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--card)}
+.gmmap iframe{display:block;width:100%;height:200px;border:0}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 @media (max-width:380px){.form{grid-template-columns:1fr}.mast h1{font-size:25px}.tk{grid-template-columns:80px 1fr}}
 /* 移動時間：夾在兩張行程卡中間，橫向顯示，半透明 */
@@ -706,6 +720,26 @@ function dur(min){
 }
 var HOPN = {walk:'步行',bus:'大眾運輸',plane:'飛行',custom:'自訂移動',ship:'水上移動'};
 var HOPI = {walk:'walk',bus:'bus',plane:'plane',custom:'pencil',ship:'ship'};
+var CAN_EMBED=!(window.claude&&typeof window.claude.use==='function');
+function parseGmaps(text){
+  text=String(text||'').trim(); if(!text) return null;
+  var um=text.match(/https?:\/\/[^\s]+/); if(!um) return null;
+  var url=um[0].replace(/[)\]」』>,，。]+$/,'');
+  if(!/google\.[^/]+\/maps|maps\.app\.goo\.gl|goo\.gl\/maps|maps\.google\.|g\.co\/kgs/.test(url)) return null;
+  var lines=text.replace(um[0],'').split(/\n+/).map(function(x){return x.trim();}).filter(function(x){return x&&!/^(google ?(地圖|maps)|分享|share)$/i.test(x);});
+  var name=lines[0]||'', addr=lines.slice(1).join(' '), lat=null, lng=null, m;
+  var dec=function(x){ try{ return decodeURIComponent(x.replace(/\+/g,' ')); }catch(e){ return x.replace(/\+/g,' '); } };
+  if((m=url.match(/\/maps\/place\/([^/@?]+)/))&&!name) name=dec(m[1]);
+  if((m=url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/))){ lat=m[1]; lng=m[2]; }
+  else if((m=url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/))){ lat=m[1]; lng=m[2]; }
+  else if((m=url.match(/[?&](?:q|query|ll|destination)=(-?\d+\.\d+)(?:,|%2C)\s*(-?\d+\.\d+)/i))){ lat=m[1]; lng=m[2]; }
+  if(!name&&(m=url.match(/[?&](?:q|query)=([^&]+)/))){ var qv=dec(m[1]); if(!/^-?\d+\.\d+,\s*-?\d+\.\d+$/.test(qv)) name=qv; }
+  if(/^-?\d+\.\d+,\s*-?\d+\.\d+$/.test(name)) name='';
+  return {url:url,name:name,addr:addr,ll:(lat&&lng)?(lat+','+lng):'',short:/goo\.gl|g\.co/.test(url)};
+}
+function gmMapText(g){ return g.name?(g.addr?g.name+' '+g.addr:g.name):(g.addr||''); }
+function embedSrc(q){ return 'https://maps.google.com/maps?q='+enc(q)+'&z=16&hl=zh-TW&output=embed'; }
+function navDest(it){ return it.ll||it.map; }
 var dirUrl = function(q){return 'https://www.google.com/maps/dir/?api=1&destination='+enc(q)+'&travelmode=transit';};
 var mapUrl = function(q){return 'https://www.google.com/maps/search/?api=1&query='+enc(q);};
 var wxUrl = function(q){ return 'weather://'; };
@@ -1165,7 +1199,7 @@ function bodyHtml(it){
   var endT=(toMin(it.t)!=null&&it.stay)?fromMin(toMin(it.t)+it.stay):'';
   var stay=it.stay?('停留 '+dur(it.stay)+(endT?'，約 '+endT+' 離開':'')):'';
   var meta='<div class="meta">'+(it.custom?'<span class="man">我新增</span>':'')+(it.edited?'<span class="man">已調整</span>':'')+(it.manual?'<span class="man">自訂時間</span>':'')+(stay?'<span>'+esc(stay)+'</span>':'')+'</div>';
-  var acts='<div class="acts">'+(it.map?'<a class="nv" href="'+dirUrl(it.map)+'" target="_blank" rel="noopener">'+ic('nav')+'導航</a><a class="nv alt" href="'+mapUrl(it.map)+'" target="_blank" rel="noopener">看地圖</a>':'')+'<button type="button" class="nv alt" data-toggle-edit="'+it.id+'">'+ic('pencil')+'編輯／刪除</button></div>';
+  var acts='<div class="acts">'+(it.map||it.ll?'<a class="nv" href="'+dirUrl(navDest(it))+'" target="_blank" rel="noopener">'+ic('nav')+'導航</a><a class="nv alt" href="'+(it.gurl||mapUrl(navDest(it)))+'" target="_blank" rel="noopener">看地圖</a>':'')+'<button type="button" class="nv alt" data-toggle-edit="'+it.id+'">'+ic('pencil')+'編輯／刪除</button></div>';
   return '<div class="cbody">'+
     '<h3 class="nm">'+esc(it.name)+'</h3>'+descHtml(it)+meta+(it.warn?'<p class="warnline"><b>需確認　</b>'+esc(it.warn)+'</p>':'')+chipsHtml(it)+acts+editHtml(it)+tkHtml(it)+ptipHtml(it)+infoHtml(it)+guideHtml(it)+jrHtml(it)+
     '<textarea class="note" id="note-'+it.id+'" data-note="'+it.id+'" rows="1" placeholder="我的筆記：想買的、排隊心得、店名…">'+esc(note)+'</textarea></div>';
@@ -1313,12 +1347,18 @@ function addHtml(d){
   var opts=['food','act','shop','sight','stay','transit','free'].map(function(k){return '<option value="'+k+'">'+KIND[k].label+'</option>';}).join('');
   return '<div class="addwrap"><button type="button" class="addbtn" data-addopen="'+d.id+'">'+ic('plus')+'新增行程</button>'+
     '<div class="edit addform" id="add-'+d.id+'" hidden>'+
+    '<div class="full gmbox"><div class="gmh">'+ic('nav')+'<b>從 Google Maps 加入</b></div>'+
+      '<ol class="gmsteps"><li>按「在 Google Maps 找」搜尋地點（先填好下面的名稱，會直接幫你搜）</li><li>在 Google Maps 點地點 →「分享」→「複製連結」</li><li>回來貼到這個框，名稱和位置會自動填好</li></ol>'+
+      '<textarea id="a-gm" rows="2" placeholder="貼上 Google Maps 的分享內容或連結"></textarea>'+
+      '<div class="gmres" id="a-gmres" hidden></div>'+
+      '<a class="mini" id="a-gmsearch" href="'+mapUrl('大阪')+'" target="_blank" rel="noopener">'+ic('nav')+'在 Google Maps 找</a></div>'+
     '<label class="full">名稱<input id="a-name" type="text" placeholder="例：心齋橋午餐"></label>'+
     '<label class="full">類型<select id="a-kind">'+opts+'</select></label>'+
     '<label>抵達時間<input id="a-t" type="time"></label>'+
     '<label>停留（時）<input id="a-h" type="number" min="0" max="23" inputmode="numeric" value="1"></label>'+
     '<label>停留（分）<input id="a-m" type="number" min="0" max="59" step="5" inputmode="numeric" value="0"></label>'+
-    '<label class="full">導航地點（沒填就用名稱）<input id="a-map" type="text" placeholder="店名或地址"></label>'+
+    '<label class="full">導航地點（沒填就用名稱）<input id="a-map" type="text" placeholder="店名、地址或 Google Maps 連結"></label>'+
+    (CAN_EMBED?'<div class="full gmmap" id="a-mapbox" hidden><iframe id="a-iframe" title="地圖預覽" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>':'')+
     '<label class="full">備註<input id="a-note" type="text" placeholder="訂位、想點的菜…"></label>'+
     '<div class="full fbtns"><button type="button" class="btn shu sm" data-addsave="'+d.id+'">儲存行程</button><button type="button" class="btn ghost sm" style="color:var(--ink)" data-addcancel="'+d.id+'">取消</button></div></div></div>';
 }
@@ -2022,7 +2062,11 @@ document.addEventListener('click',function(e){
     if(!nm2){ toast('先填行程名稱'); return; }
     if(!tt){ toast('請選抵達時間'); return; }
     var hh=Math.max(0,Math.min(23,parseInt($('#a-h').value,10)||0)), mm=Math.max(0,Math.min(59,parseInt($('#a-m').value,10)||0));
-    var obj={id:uid8('x'),name:nm2,kind:$('#a-kind').value,t:tt,stay:hh*60+mm,map:val('#a-map')||nm2};
+    var mapIn=val('#a-map'), g2=parseGmaps(mapIn)||gmPend;
+    if(parseGmaps(mapIn)) mapIn=gmMapText(g2)||nm2;
+    var obj={id:uid8('x'),name:nm2,kind:$('#a-kind').value,t:tt,stay:hh*60+mm,map:mapIn||nm2};
+    if(g2){ if(g2.ll) obj.ll=g2.ll; obj.gurl=g2.url; }
+    gmPend=null;
     (S.added[dd.id]=S.added[dd.id]||[]).push(obj);
     var nt=val('#a-note'); if(nt) S.notes[obj.id]=nt;
     openEdit=null; renderDay(); queueNotes(); toast('已新增行程');
@@ -2147,13 +2191,38 @@ document.addEventListener('change',function(e){
     if(tv) c.t=tv; c.stay=h*60+m;
     var nmEl=$('[data-edit="name"]',box), mpEl=$('[data-edit="map"]',box);
     if(nmEl&&nmEl.value.trim()) c.name=nmEl.value.trim();
-    if(mpEl) c.map=mpEl.value.trim()||c.name;
+    if(mpEl){ var gg=parseGmaps(mpEl.value); if(gg){ c.map=gmMapText(gg)||c.name; c.ll=gg.ll||''; c.gurl=gg.url; if(!c.ll) delete c.ll; } else if(mpEl.value.trim()!==c.map){ c.map=mpEl.value.trim()||c.name; delete c.ll; delete c.gurl; } }
   } else {
     var orig=findItem(id); if(!orig) return;
     S.edits[id]={t:tv||orig[1].t,stay:h*60+m};
   }
   openEdit=id; renderDay(); queueNotes();
   var el=document.getElementById('c-'+id); if(el&&el.scrollIntoView) el.scrollIntoView({block:'center'});
+});
+var gmPend=null, gmT=null;
+function gmShowMap(q){ if(!CAN_EMBED) return; var box=$('#a-mapbox'), fr=$('#a-iframe'); if(!box||!fr) return; if(!q){ box.hidden=true; return; } var src=embedSrc(q); if(fr.getAttribute('src')!==src) fr.setAttribute('src',src); box.hidden=false; }
+function gmUpdateSearch(){ var a=$('#a-gmsearch'); if(!a) return; var q=(val('#a-name')||val('#a-map')||'').trim(); if(q&&!/大阪|osaka|心斎橋|難波|梅田/i.test(q)) q+=' 大阪'; a.href=mapUrl(q||'大阪'); }
+document.addEventListener('input',function(e){
+  var t=e.target; if(!t||!t.id) return;
+  if(t.id==='a-gm'){
+    var g=parseGmaps(t.value), res=$('#a-gmres');
+    if(!t.value.trim()){ gmPend=null; res.hidden=true; return; }
+    if(!g){ res.hidden=false; res.className='gmres bad'; res.textContent='看不出是 Google Maps 的連結。請在 Google Maps 按「分享」→「複製連結」後再貼上。'; return; }
+    gmPend=g;
+    if(g.name){ $('#a-name').value=g.name; }
+    $('#a-map').value=gmMapText(g)||val('#a-name')||g.ll;
+    var kind=/拉麵|ラーメン|食堂|餐|料理|焼|燒|寿司|壽司|カフェ|咖啡|cafe|restaurant|居酒屋|うどん|そば|丼|麵/i.test(g.name+g.addr)?'food':(/hotel|ホテル|飯店|酒店|旅館/i.test(g.name)?'stay':(/shop|store|ストア|商店街|百貨|モール|mall|drug|ドラッグ|藥妝|專賣/i.test(g.name)?'shop':null));
+    if(kind) $('#a-kind').value=kind;
+    res.hidden=false; res.className='gmres ok';
+    res.innerHTML=ic('check')+'<span>已辨識'+(g.name?'：<b>'+esc(g.name)+'</b>':'')+(g.ll?'，有精確座標，導航會直接到這個點':(g.short?'。短網址看不到座標，會用名稱導航；看地圖會開你貼的連結':''))+'</span>'+(g.name?'':'<small>沒有讀到店名，請在下面「名稱」自己填</small>');
+    gmShowMap(g.ll||gmMapText(g)||g.name); gmUpdateSearch();
+    return;
+  }
+  if(t.id==='a-name'||t.id==='a-map'){
+    gmUpdateSearch();
+    if(t.id==='a-map'){ var g3=parseGmaps(t.value); if(g3){ gmPend=g3; if(g3.name&&!val('#a-name')) $('#a-name').value=g3.name; } }
+    clearTimeout(gmT); gmT=setTimeout(function(){ var q=(gmPend&&gmPend.ll)||val('#a-map')||val('#a-name'); gmShowMap(q&&q.length>1?q:''); },700);
+  }
 });
 document.addEventListener('keydown',function(e){
   if(e.key==='Enter'&&e.target&&e.target.id==='pk-new'){ e.preventDefault(); addPack(); }
