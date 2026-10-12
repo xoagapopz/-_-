@@ -403,7 +403,11 @@ html,body{touch-action:manipulation}
 .pthumbs .pt button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:0;background:var(--ink);color:var(--paper);font-size:14px;line-height:1;padding:0}
 .lbnav{display:flex;align-items:center;gap:18px;color:#fff;font-weight:700}
 .lbnav button{width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(255,255,255,.7);background:transparent;color:#fff;font-size:26px;line-height:1;padding:0}
-#lb img{touch-action:pan-y}
+#lb{overflow:hidden}
+#lb img{touch-action:none;transform-origin:center center;will-change:transform;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;position:relative;z-index:1}
+#lb.zoomed .lbnav,#lb.zoomed #lb-hint,#lb.zoomed .fbtns{opacity:0;pointer-events:none}
+#lb-q{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:2;padding:3px 12px;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:700}
+#lb-hint{color:rgba(255,255,255,.7);font-size:12px}
 .syncpill{display:inline-flex;align-items:center;gap:6px;margin:6px 0 0 8px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:12.5px;font-weight:700;color:var(--ink2)}
 .syncpill.ok{color:var(--matcha)}
 .syncpill.warn{color:var(--kin)}
@@ -631,7 +635,7 @@ html,body{touch-action:manipulation}
   </div>
   <p class="lead" id="au-msg" style="margin:0"></p>
 </div></div>
-<div id="lb" hidden><img id="lb-img" alt="放大圖片"><div class="lbnav" id="lb-nav" hidden><button type="button" id="lb-prev" aria-label="上一張">‹</button><span id="lb-cnt"></span><button type="button" id="lb-next" aria-label="下一張">›</button></div><div class="fbtns"><button class="btn" type="button" id="lb-x">關閉</button><button class="btn ghost" style="color:#fff" type="button" id="lb-del" hidden>刪除這張照片</button></div></div>
+<div id="lb" hidden><span id="lb-q" hidden></span><img id="lb-img" alt="放大圖片" draggable="false"><span id="lb-hint">兩指縮放・點兩下放大</span><div class="lbnav" id="lb-nav" hidden><button type="button" id="lb-prev" aria-label="上一張">‹</button><span id="lb-cnt"></span><button type="button" id="lb-next" aria-label="下一張">›</button></div><div class="fbtns"><button class="btn" type="button" id="lb-x">關閉</button><button class="btn ghost" style="color:#fff" type="button" id="lb-del" hidden>刪除這張照片</button></div></div>
 
 <script>
 (function(){
@@ -985,7 +989,7 @@ var SOS_TW = [
 ];
 
 /* ---------- 狀態與儲存 ---------- */
-var S = {notes:{},codes:{},items:{},forecast:{},edits:{},added:{},hotel:{},pack:null,phr:null,routes:{},mode:'local'};
+var S = {notes:{},codes:{},items:{},forecast:{},edits:{},added:{},hotel:{},pack:null,phr:null,routes:{},origs:{},mode:'local'};
 var db=null, col=null, uid=null;
 var LSK='osaka-trip-v1';
 
@@ -993,12 +997,12 @@ function loadLocal(){
   try{
     var raw=localStorage.getItem(LSK); if(!raw) return;
     var o=JSON.parse(raw)||{};
-    S.notes=o.notes||{}; S.codes=o.codes||{}; S.edits=o.edits||{}; S.added=o.added||{}; S.hotel=o.hotel||{}; S.pack=o.pack||null; S.phr=o.phr||null; S.routes=o.routes||{}; if(o.items) S.items=o.items;
+    S.notes=o.notes||{}; S.codes=o.codes||{}; S.edits=o.edits||{}; S.added=o.added||{}; S.hotel=o.hotel||{}; S.pack=o.pack||null; S.phr=o.phr||null; S.routes=o.routes||{}; S.origs=o.origs||{}; if(o.items) S.items=o.items;
   }catch(e){}
 }
 function saveLocal(){
   try{
-    var o={notes:S.notes,codes:S.codes,edits:S.edits,added:S.added,hotel:S.hotel,pack:S.pack,phr:S.phr,routes:S.routes};
+    var o={notes:S.notes,codes:S.codes,edits:S.edits,added:S.added,hotel:S.hotel,pack:S.pack,phr:S.phr,routes:S.routes,origs:S.origs};
     if(S.mode!=='cloud') o.items=S.items;
     localStorage.setItem(LSK,JSON.stringify(o));
   }catch(e){ toast('這支手機的儲存空間不足，圖片可能沒存到'); }
@@ -1010,7 +1014,7 @@ function flushNotes(){
   if(S.mode!=='cloud'||!col) return;
   if(nBusy){nDirty=true;return;}
   nBusy=true;
-  col.doc('notes').set({n:S.notes,c:S.codes,e:S.edits,a:S.added,h:S.hotel,p:S.pack,j:S.phr,r:S.routes,updated:Date.now()}).catch(function(){
+  col.doc('notes').set({n:S.notes,c:S.codes,e:S.edits,a:S.added,h:S.hotel,p:S.pack,j:S.phr,r:S.routes,o:S.origs,updated:Date.now()}).catch(function(){
     toast('筆記沒能同步，已先存在這支手機');
   }).then(function(){ nBusy=false; if(nDirty){nDirty=false;flushNotes();} });
 }
@@ -1136,7 +1140,7 @@ function bodyHtml(it){
 function tkFor(k,who){ return !k.who||k.who==='both'||k.who===who; }
 function tkOf(ref,who){ return itemsOf('ticket').filter(function(k){return k.ref===ref&&(!who||tkFor(k,who));}).sort(function(a,b){return (a.ts||0)-(b.ts||0);}); }
 var openTk=null, pendTk={}, lbId=null, lbSet=null;
-function lbShow(){ var s=lbSet; if(!s) return; var x=s.list[s.i]; $('#lb-img').src=x.img; lbId=x.id; $('#lb-cnt').textContent=(s.i+1)+' / '+s.list.length; $('#lb-nav').hidden=s.list.length<2; var ld=$('#lb-del'); ld.hidden=!(S.items[x.id]&&S.items[x.id].kind==='tphoto'); ld.classList.remove('armed'); ld.textContent='刪除這張照片'; }
+function lbShow(){ var s=lbSet; if(!s) return; var x=s.list[s.i]; lbSrc(x.img); lbId=x.id; $('#lb-cnt').textContent=(s.i+1)+' / '+s.list.length; $('#lb-nav').hidden=s.list.length<2; var ld=$('#lb-del'); ld.hidden=!(S.items[x.id]&&S.items[x.id].kind==='tphoto'); ld.classList.remove('armed'); ld.textContent='刪除這張照片'; }
 function lbStep(d){ if(!lbSet) return; var n=lbSet.list.length; lbSet.i=(lbSet.i+d+n)%n; lbShow(); }
 function fileBtn(k){ return k.pdf?'<button type="button" class="pdfb" data-pdf="'+k.id+'">'+ic('file')+'<span>'+esc(k.pdf.name||'PDF 門票')+'</span><small>點開查看</small></button>':''; }
 function whoTag(k){ return (!k.who||k.who==='both')?'<span class="wtag">兩人共用</span>':''; }
@@ -1605,10 +1609,13 @@ function countdown(){
 
 /* ---------- 圖片壓縮 ---------- */
 function shrink(file){
+  return shrinkThumb(file).then(function(d){ if(d) keepOriginal(file,d); return d; });
+}
+function shrinkThumb(file){
   return new Promise(function(resolve){
     var url=URL.createObjectURL(file), img=new Image();
     img.onload=function(){
-      var max=1200,q=0.74,out=null;
+      var max=1600,q=0.85,out=null;
       for(var i=0;i<7;i++){
         var r=Math.min(1,max/Math.max(img.width,img.height));
         var c=document.createElement('canvas'); c.width=Math.max(1,Math.round(img.width*r)); c.height=Math.max(1,Math.round(img.height*r));
@@ -1623,6 +1630,135 @@ function shrink(file){
     img.src=url;
   });
 }
+/* ---------- 原圖保存：卡片顯示縮圖，放大時載入未壓縮的原檔 ---------- */
+var ORIG_MAX=25*1024*1024, OCH=180000, origMem={}, origBusy={};
+function hstr(x){ var h=2166136261>>>0, step=Math.max(1,Math.floor(x.length/4000)); for(var i=0;i<x.length;i+=step){ h^=x.charCodeAt(i); h=Math.imul(h,16777619)>>>0; } return h.toString(36)+'_'+x.length.toString(36); }
+var idbP=null;
+function idb(){
+  if(idbP) return idbP;
+  idbP=new Promise(function(res){ try{ var r=indexedDB.open('osaka-orig',1); r.onupgradeneeded=function(){ r.result.createObjectStore('o'); }; r.onsuccess=function(){ res(r.result); }; r.onerror=function(){ res(null); }; }catch(e){ res(null); } });
+  return idbP;
+}
+function idbGet(k){ return idb().then(function(d){ if(!d) return null; return new Promise(function(res){ try{ var q=d.transaction('o').objectStore('o').get(k); q.onsuccess=function(){ res(q.result||null); }; q.onerror=function(){ res(null); }; }catch(e){ res(null); } }); }); }
+function idbPut(k,v){ return idb().then(function(d){ if(!d) return false; return new Promise(function(res){ try{ var tx=d.transaction('o','readwrite'); tx.objectStore('o').put(v,k); tx.oncomplete=function(){ res(true); }; tx.onerror=function(){ res(false); }; }catch(e){ res(false); } }); }); }
+function idbDel(k){ return idb().then(function(d){ if(!d) return; try{ d.transaction('o','readwrite').objectStore('o').delete(k); }catch(e){} }); }
+function origCol(fid){ return db.doc('data/users/'+uid+'/orig-'+fid).collection('c'); }
+function origCloud(){ return S.mode==='cloud'&&((sbEmail&&sb)||(db&&uid)); }
+function origPut(fid,n,d){ if(sbEmail&&sb) return Promise.resolve(sb.from('docs').upsert({id:'orig-'+fid+'-'+n,data:{orig:1,d:d},updated_at:new Date().toISOString()})).then(function(r){ if(r&&r.error) throw r.error; }); return origCol(fid).doc(String(n)).set({d:d}); }
+function origGet(fid){
+  if(sbEmail&&sb) return Promise.resolve(sb.from('docs').select('id,data').like('id','orig-'+fid+'-%')).then(function(r){ if(r&&r.error) throw r.error; return (r.data||[]).map(function(x){ return [parseInt(x.id.split('-').pop(),10),(x.data||{}).d||'']; }); });
+  return origCol(fid).get().then(function(snap){ return snap.docs.map(function(x){ return [parseInt(x.id,10),(x.data()||{}).d||'']; }); });
+}
+function origDel(fid,n){ if(sbEmail&&sb) return Promise.resolve(sb.from('docs').delete().eq('id','orig-'+fid+'-'+n)); return origCol(fid).doc(String(n)).delete(); }
+function readAsUrl(file){ return new Promise(function(res){ var r=new FileReader(); r.onload=function(){ res(String(r.result)); }; r.onerror=function(){ res(null); }; r.readAsDataURL(file); }); }
+function keepOriginal(file,thumb){
+  if(!file||file.size>ORIG_MAX){ if(file&&file.size>ORIG_MAX) toast('原圖超過 25 MB，只保存縮圖'); return; }
+  var h=hstr(thumb); if(S.origs[h]) return;
+  var fid=uid8('o'); S.origs[h]={f:fid,p:0,t:Date.now()};
+  readAsUrl(file).then(function(d){
+    if(!d) return;
+    origMem[fid]=d;
+    idbPut(fid,d);
+    queueNotes();
+    if(origCloud()) uploadOrig(h);
+  });
+}
+function uploadOrig(h){
+  var e=S.origs[h]; if(!e||e.p||origBusy[e.f]) return Promise.resolve();
+  origBusy[e.f]=1;
+  var get=origMem[e.f]?Promise.resolve(origMem[e.f]):idbGet(e.f);
+  return get.then(function(d){
+    if(!d){ delete origBusy[e.f]; return; }
+    var parts=[]; for(var i=0;i<d.length;i+=OCH) parts.push(d.slice(i,i+OCH));
+    var chain=Promise.resolve();
+    parts.forEach(function(x,n){ chain=chain.then(function(){ return origPut(e.f,n,x); }); });
+    return chain.then(function(){ if(S.origs[h]) { S.origs[h].p=parts.length; queueNotes(); } delete origBusy[e.f]; },function(err){ delete origBusy[e.f]; if(err&&err.code==='quota_exceeded') toast('雲端空間已滿，原圖只存在這支手機'); });
+  });
+}
+function pushLocalOrigs(){ if(S.mode!=='cloud') return; Object.keys(S.origs).forEach(function(h){ if(!S.origs[h].p) uploadOrig(h); }); }
+function loadOrig(thumb){
+  if(!thumb||thumb.indexOf('data:image')!==0) return Promise.resolve(null);
+  var e=S.origs[hstr(thumb)]; if(!e) return Promise.resolve(null);
+  if(origMem[e.f]) return Promise.resolve(origMem[e.f]);
+  return idbGet(e.f).then(function(d){
+    if(d){ origMem[e.f]=d; return d; }
+    if(!(e.p&&origCloud())) return null;
+    return origGet(e.f).then(function(cs){
+      cs.sort(function(a,b){return a[0]-b[0];});
+      if(cs.length<e.p) return null;
+      var full=cs.map(function(x){return x[1];}).join(''); origMem[e.f]=full; idbPut(e.f,full); return full;
+    }).catch(function(){ return null; });
+  });
+}
+function allThumbHashes(){
+  var set={};
+  (function walk(v){ if(typeof v==='string'){ if(v.indexOf('data:image')===0) set[hstr(v)]=1; } else if(v&&typeof v==='object'){ Object.keys(v).forEach(function(k){ walk(v[k]); }); } })(S.items);
+  return set;
+}
+function cleanOrigs(){
+  var live=allThumbHashes(), now=Date.now(), changed=false;
+  Object.keys(S.origs).forEach(function(h){
+    var e=S.origs[h]; if(live[h]||now-(e.t||0)<2*864e5) return;
+    if(e.p&&origCloud()){ for(var n=0;n<e.p;n++) Promise.resolve(origDel(e.f,n)).catch(function(){}); }
+    idbDel(e.f); delete origMem[e.f]; delete S.origs[h]; changed=true;
+  });
+  if(changed) queueNotes();
+}
+/* ---------- 放大圖：兩指縮放、拖曳、點兩下放大 ---------- */
+var Z={z:1,x:0,y:0,multi:false};
+function zApply(){ var im=$('#lb-img'); im.style.transform='translate('+Z.x+'px,'+Z.y+'px) scale('+Z.z+')'; $('#lb').classList.toggle('zoomed',Z.z>1.01); }
+function zReset(){ Z.z=1; Z.x=0; Z.y=0; zApply(); }
+function zClamp(){
+  var im=$('#lb-img'); if(Z.z<=1.01){ Z.z=1; Z.x=0; Z.y=0; return; }
+  var w=im.offsetWidth*Z.z, h=im.offsetHeight*Z.z, vw=window.innerWidth, vh=window.innerHeight;
+  var mx=Math.max(0,(w-vw)/2+20), my=Math.max(0,(h-vh)/2+20);
+  Z.x=Math.max(-mx,Math.min(mx,Z.x)); Z.y=Math.max(-my,Math.min(my,Z.y));
+}
+var lbCur=null;
+function lbSrc(thumb){
+  var im=$('#lb-img'); lbCur=thumb; im.src=thumb; zReset();
+  var tag=$('#lb-q'); tag.hidden=true;
+  var e=thumb&&S.origs[hstr(thumb)]; if(!e) return;
+  tag.textContent='載入原圖中…'; tag.hidden=false;
+  loadOrig(thumb).then(function(full){
+    if(lbCur!==thumb) return;
+    if(full){ im.src=full; tag.textContent='原圖'; setTimeout(function(){ if(lbCur===thumb) tag.hidden=true; },1500); }
+    else { tag.textContent='原圖還在上傳，先顯示預覽'; }
+  });
+}
+(function(){
+  var im=document.getElementById('lb-img'), pts={}, start=null, lastTap=0;
+  function list(){ return Object.keys(pts).map(function(k){return pts[k];}); }
+  function center(){ var r=im.getBoundingClientRect(); return {x:r.left+r.width/2-Z.x, y:r.top+r.height/2-Z.y}; }
+  function snap(){ var l=list(), c=center(); if(l.length>=2){ var a=l[0],b=l[1]; start={d:Math.hypot(a.x-b.x,a.y-b.y)||1,m:{x:(a.x+b.x)/2,y:(a.y+b.y)/2},z:Z.z,x:Z.x,y:Z.y,c:c}; } else if(l.length===1){ start={p:{x:l[0].x,y:l[0].y},x:Z.x,y:Z.y,z:Z.z,c:c}; } else start=null; }
+  im.addEventListener('pointerdown',function(e){ pts[e.pointerId]={x:e.clientX,y:e.clientY}; try{ im.setPointerCapture(e.pointerId); }catch(x){} if(list().length>=2) Z.multi=true; snap(); e.preventDefault(); });
+  im.addEventListener('pointermove',function(e){
+    if(!pts[e.pointerId]) return; pts[e.pointerId]={x:e.clientX,y:e.clientY}; var l=list(); if(!start) return;
+    if(l.length>=2&&start.d){
+      var a=l[0],b=l[1], d=Math.hypot(a.x-b.x,a.y-b.y), m={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+      var z1=Math.max(1,Math.min(6,start.z*d/start.d)), k=z1/start.z;
+      Z.z=z1; Z.x=(m.x-start.c.x)-(start.m.x-start.c.x-start.x)*k; Z.y=(m.y-start.c.y)-(start.m.y-start.c.y-start.y)*k; zApply();
+    } else if(l.length===1&&start.p&&Z.z>1.01){
+      Z.x=start.x+(l[0].x-start.p.x); Z.y=start.y+(l[0].y-start.p.y); zApply();
+    }
+  });
+  function up(e){
+    var wasOne=list().length===1, p=pts[e.pointerId]; delete pts[e.pointerId];
+    if(!list().length){
+      zClamp(); im.style.transition='transform .18s ease'; zApply(); setTimeout(function(){ im.style.transition=''; },200);
+      var now=Date.now();
+      if(wasOne&&!Z.multi&&start&&start.p&&p&&Math.hypot(p.x-start.p.x,p.y-start.p.y)<10){
+        if(now-lastTap<300){ var c=center(); if(Z.z>1.01){ zReset(); } else { var k=2.5; Z.z=k; Z.x=-(p.x-c.x)*(k-1); Z.y=-(p.y-c.y)*(k-1); zClamp(); } im.style.transition='transform .2s ease'; zApply(); setTimeout(function(){ im.style.transition=''; },220); lastTap=0; }
+        else lastTap=now;
+      }
+      setTimeout(function(){ Z.multi=false; },50);
+    }
+    snap();
+  }
+  im.addEventListener('pointerup',up); im.addEventListener('pointercancel',up);
+  im.addEventListener('wheel',function(e){ e.preventDefault(); var c=center(), z0=Z.z, z1=Math.max(1,Math.min(6,z0*(e.deltaY<0?1.15:1/1.15))), k=z1/z0; Z.x=(e.clientX-c.x)-(e.clientX-c.x-Z.x)*k; Z.y=(e.clientY-c.y)-(e.clientY-c.y-Z.y)*k; Z.z=z1; zClamp(); zApply(); },{passive:false});
+  im.addEventListener('dragstart',function(e){ e.preventDefault(); });
+})();
 var pendTip=[];
 function renderPendTip(){ var b=$('#p-prevs'); if(!b) return; b.innerHTML=pendTip.map(function(d,i){return '<span class="pt"><img src="'+d+'" alt="預覽 '+(i+1)+'"><button type="button" data-prem="'+i+'" aria-label="移除這張">×</button></span>';}).join(''); }
 var pend={flight:null,coupon:null,ticket:null,tip:null};
@@ -1714,13 +1850,13 @@ document.addEventListener('click',function(e){
   if(t.id==='lb-prev'){ lbStep(-1); return; }
   if(t.id==='lb-next'){ lbStep(1); return; }
   if(t.hasAttribute('data-lbg')){ var tpi=S.items[t.getAttribute('data-lbg')]; if(tpi){ lbSet={list:tipImgs(tpi),i:parseInt(t.getAttribute('data-i'),10)||0}; if(lbSet.list.length){ lbShow(); $('#lb').hidden=false; } } return; }
-  if(t.hasAttribute('data-lb')){ lbSet=null; $('#lb-nav').hidden=true; var it=S.items[t.getAttribute('data-lb')]; if(it&&it.img){ $('#lb-img').src=it.img; lbId=it.id; var ld=$('#lb-del'); ld.hidden=it.kind!=='photo'; ld.classList.remove('armed'); ld.textContent='刪除這張照片'; $('#lb').hidden=false; } return; }
+  if(t.hasAttribute('data-lb')){ lbSet=null; $('#lb-nav').hidden=true; var it=S.items[t.getAttribute('data-lb')]; if(it&&it.img){ lbSrc(it.img); lbId=it.id; var ld=$('#lb-del'); ld.hidden=it.kind!=='photo'; ld.classList.remove('armed'); ld.textContent='刪除這張照片'; $('#lb').hidden=false; } return; }
   if(t.id==='lb-del'){
     if(!t.classList.contains('armed')){ t.classList.add('armed'); t.textContent='再按一次刪除'; return; }
     var pid2=lbId; $('#lb').hidden=true; lbSet=null; delItem(pid2).then(function(){ renderDay(); renderTools(); toast('照片已刪除'); }); renderDay(); renderTools(); return;
   }
   if(t.hasAttribute('data-gowx')){ showTab('plan'); selectDay(parseInt(t.getAttribute('data-gowx'),10)); return; }
-  if(t.id==='lb-x'||t.id==='lb'){ if(e.target.id==='lb-img') return; $('#lb').hidden=true; return; }
+  if(t.id==='lb-x'||t.id==='lb'){ if(e.target.id==='lb-img') return; $('#lb').hidden=true; lbCur=null; zReset(); return; }
   if(t.hasAttribute('data-del')){ var id=t.getAttribute('data-del'); armDel(t,function(){ var was=S.items[id]; if(was&&was.kind==='tip'){ itemsOf('tphoto').filter(function(k){return k.ref===id;}).forEach(function(k){ delItem(k.id); }); } delItem(id).then(function(){ if(sheetId===id) closeSheet(); renderTools(); if(was&&was.ref){ renderDay(); } toast('已刪除'); }); }); return; }
   if(t.hasAttribute('data-used')){ var c=S.items[t.getAttribute('data-used')]; if(c){ c.used=!c.used; saveItem(c).then(renderTools); renderTools(); } return; }
   if(t.hasAttribute('data-jump')){
@@ -1992,8 +2128,8 @@ document.addEventListener('keydown',function(e){
 });
 document.addEventListener('toggle',function(e){ var d=e.target; if(d&&d.classList&&d.classList.contains('infod')&&d.open){ var ta=$('textarea',d); if(ta) autosize(ta); } },true);
 (function(){ var sx=null,sy=null,lb=$('#lb');
-  lb.addEventListener('touchstart',function(e){ var t=e.touches[0]; sx=t.clientX; sy=t.clientY; },{passive:true});
-  lb.addEventListener('touchend',function(e){ if(sx==null) return; var t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy; sx=null; if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.5) lbStep(dx<0?1:-1); },{passive:true});
+  lb.addEventListener('touchstart',function(e){ if(e.touches.length>1){ sx=null; return; } var t=e.touches[0]; sx=t.clientX; sy=t.clientY; },{passive:true});
+  lb.addEventListener('touchend',function(e){ if(sx==null) return; if(Z.z>1.01||Z.multi||e.touches.length){ sx=null; return; } var t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy; sx=null; if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.5) lbStep(dx<0?1:-1); },{passive:true});
   document.addEventListener('keydown',function(e){ if(lb.hidden) return; if(e.key==='ArrowLeft') lbStep(-1); else if(e.key==='ArrowRight') lbStep(1); else if(e.key==='Escape') lb.hidden=true; });
 })();
 document.addEventListener('visibilitychange',function(){ if(document.hidden){ clearTimeout(nTimer); flushNotes(); } });
@@ -2045,7 +2181,7 @@ function makeSupaCol(){
   function emit(){ if(cb) cb({docs:Object.keys(cache).map(function(id){ return {id:id,data:function(){ return cache[id]; }}; })}); }
   function chk(r){ if(r&&r.error) throw r.error; return r; }
   function fetchAll(){
-    return Promise.resolve(sb.from('docs').select('id,data')).then(chk).then(function(r){
+    return Promise.resolve(sb.from('docs').select('id,data').not('id','like','orig-%')).then(chk).then(function(r){
       var c={}; (r.data||[]).forEach(function(row){ c[row.id]=row.data; });
       cache=c; emit();
     });
@@ -2059,6 +2195,7 @@ function makeSupaCol(){
       cb=f; errcb=e;
       fetchAll().then(function(){
         chan=sb.channel('docs-sync').on('postgres_changes',{event:'*',schema:'public',table:'docs'},function(p){
+          var pid=(p.new&&p.new.id)||(p.old&&p.old.id)||''; if(pid.indexOf('orig-')===0) return;
           if(p.eventType==='DELETE'){ if(p.old&&p.old.id) delete cache[p.old.id]; }
           else if(p.new){ cache[p.new.id]=p.new.data; }
           emit();
@@ -2080,12 +2217,29 @@ function startSupaSync(email){
 }
 function exportBackup(){
   var o={app:'osaka-trip',v:1,at:new Date().toISOString(),state:{notes:S.notes,codes:S.codes,edits:S.edits,added:S.added,hotel:S.hotel,pack:S.pack,phr:S.phr,routes:S.routes},items:S.items};
-  try{
-    var blob=new Blob([JSON.stringify(o)],{type:'application/json'}), a=document.createElement('a');
-    a.href=URL.createObjectURL(blob); a.download='osaka-trip-backup-'+new Date().toISOString().slice(0,10)+'.json';
-    document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500);
-    authMsg('已匯出備份檔。');
-  }catch(e){ authMsg('匯出失敗：'+e.message); }
+  var name='osaka-trip-backup-'+new Date().toISOString().slice(0,10)+'.json', json;
+  try{ json=JSON.stringify(o); }catch(e){ authMsg('匯出失敗：'+e.message); return; }
+  function linkSave(){
+    try{
+      var blob=new Blob([json],{type:'application/json'}), a=document.createElement('a');
+      a.href=URL.createObjectURL(blob); a.download=name;
+      document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },1500);
+      authMsg('已匯出備份檔：'+name);
+    }catch(e){ authMsg('匯出失敗：'+e.message); }
+  }
+  var inClaude=window.claude&&typeof window.claude.use==='function';
+  if(!inClaude){ linkSave(); return; }
+  authMsg('準備備份檔中…');
+  Promise.resolve(window.claude.use('downloads')).then(function(dl){
+    if(!dl){ linkSave(); return; }
+    return dl.save({filename:name,data:new Blob([json],{type:'application/json'})}).then(function(){ authMsg('已匯出備份檔：'+name); },function(err){
+      var c=err&&err.code;
+      if(c==='declined') authMsg('已取消匯出。');
+      else if(c==='rate_limited') authMsg('存檔視窗已經開著，請先處理完再按一次。');
+      else if(c==='too_large') authMsg('備份檔太大，無法在這裡下載。');
+      else linkSave();
+    });
+  }).catch(linkSave);
 }
 function importBackup(file){
   var rd=new FileReader();
@@ -2161,11 +2315,12 @@ function startCloud(){
         var localN=Object.keys(S.notes).length+Object.keys(S.codes).length+Object.keys(S.edits).length+Object.keys(S.added).length, localI=Object.keys(S.items);
         var localX=localN||Object.keys(S.hotel).length||S.pack||S.phr||Object.keys(S.routes).length;
         localI.forEach(function(k){ if(!items[k]) saveItem(S.items[k]); });
-        if(nd){ S.notes=Object.assign({},S.notes,nd.n||{}); S.codes=Object.assign({},S.codes,nd.c||{}); S.edits=Object.assign({},S.edits,nd.e||{}); S.added=Object.assign({},S.added,nd.a||{}); S.hotel=Object.assign({},S.hotel,nd.h||{}); S.pack=nd.p||S.pack; S.phr=nd.j||S.phr; S.routes=Object.assign({},S.routes,nd.r||{}); }
+        if(nd){ S.notes=Object.assign({},S.notes,nd.n||{}); S.codes=Object.assign({},S.codes,nd.c||{}); S.edits=Object.assign({},S.edits,nd.e||{}); S.added=Object.assign({},S.added,nd.a||{}); S.hotel=Object.assign({},S.hotel,nd.h||{}); S.pack=nd.p||S.pack; S.phr=nd.j||S.phr; S.routes=Object.assign({},S.routes,nd.r||{}); S.origs=Object.assign({},S.origs,nd.o||{}); }
         if(localX){ flushNotes(); }
+        setTimeout(pushLocalOrigs,1500); setTimeout(cleanOrigs,8000);
         Object.keys(items).forEach(function(k){ S.items[k]=items[k]; });
       } else {
-        if(nd&&!(nPend||nBusy)){ S.notes=nd.n||{}; S.codes=nd.c||{}; S.edits=nd.e||{}; S.added=nd.a||{}; S.hotel=nd.h||{}; S.pack=nd.p||null; S.phr=nd.j||null; S.routes=nd.r||{}; }
+        if(nd&&!(nPend||nBusy)){ S.notes=nd.n||{}; S.codes=nd.c||{}; S.edits=nd.e||{}; S.added=nd.a||{}; S.hotel=nd.h||{}; S.pack=nd.p||null; S.phr=nd.j||null; S.routes=nd.r||{}; S.origs=nd.o||{}; }
         S.items=items;
       }
       renderLive();
