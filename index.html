@@ -1,14 +1,12 @@
-<!doctype html><html><head>
-<meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>無尾熊離家記</title>
 <!-- 一般瀏覽器 Favicon -->
-<link rel="icon" href="./favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.ico" sizes="any">
 <!-- iOS 主畫面 Icon -->
-<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <!-- iOS 主畫面顯示名稱 -->
 <meta name="apple-mobile-web-app-title" content="無尾熊離家記">
 <meta name="apple-mobile-web-app-capable" content="yes">
-</head><body>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap">
 <style>
 /* 版面概念：簡約的手機行程本。單欄卡片、類型以小標籤區分，色票取自日本傳統色（生成り、墨、茜、藍、萌黄、躑躅、朽葉、藤）。 */
@@ -428,14 +426,6 @@ input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea{fo
 html,body{touch-action:manipulation}
 .infota{width:100%;min-height:64px;resize:none;overflow:hidden;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);line-height:1.6}
 .pthumbs{display:flex;flex-wrap:wrap;gap:8px}
-.tsearch{position:relative;display:flex;align-items:center;margin-top:10px}
-.tsearch .ic{position:absolute;left:12px;width:18px;height:18px;color:var(--ink2);pointer-events:none}
-.tsearch input{width:100%;padding:10px 38px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:15px;-webkit-appearance:none;appearance:none}
-.tsearch input:focus{outline:none;border-color:var(--ai);box-shadow:0 0 0 3px var(--ai-t)}
-.tsearch input::-webkit-search-cancel-button{display:none}
-.tsearch button{position:absolute;right:8px;width:26px;height:26px;border-radius:50%;border:0;background:var(--line);color:var(--ink);font-size:16px;line-height:1;padding:0}
-.tq-info{margin-top:6px;font-size:12.5px;color:var(--ink2)}
-#tips mark{background:var(--kin-t);color:var(--ink);border-radius:3px;padding:0 1px}
 .cpadd{--k:var(--shu);margin-top:8px;align-self:flex-start}
 .pthumbs .pt{position:relative;display:inline-block}
 .pthumbs .pt img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block}
@@ -519,8 +509,6 @@ html,body{touch-action:manipulation}
 
       <div id="seg-tips" hidden>
         <div class="sec-h"><h2>旅遊攻略</h2><button class="btn shu sm" type="button" data-openform="tip">新增攻略</button></div>
-        <div class="tsearch" role="search"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="tip-q" type="search" placeholder="搜尋攻略，例如：退稅、ICOCA" aria-label="搜尋攻略" autocomplete="off" enterkeyhint="search"><button type="button" id="tip-qx" aria-label="清除搜尋" hidden>×</button></div>
-        <div class="tq-info" id="tip-qinfo" hidden></div>
         <div class="panel" id="tip-form" hidden>
           <div class="form">
             <label class="full">標題<input id="p-title" type="text" placeholder="例：搭電車、退稅、行李"></label>
@@ -1629,20 +1617,13 @@ function tipGrid(p){
   var a=tipImgs(p); if(!a.length) return '';
   return '<div class="jr-g">'+a.map(function(x,i){return '<img data-lbg="'+p.id+'" data-i="'+i+'" src="'+x.img+'" alt="攻略圖片 '+(i+1)+'">';}).join('')+'</div>';
 }
-var tipQ='';
-function hiq(txt,terms){ var h=esc(txt); if(!terms.length) return h; terms.forEach(function(t){ var e=esc(t).replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); h=h.replace(new RegExp('('+e+')(?![^<]*>)','gi'),'<mark>$1</mark>'); }); return h; }
 function renderTips(){
-  var all=itemsOf('tip').sort(function(a,b){return (a.ts||0)-(b.ts||0);});
-  var terms=tipQ.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  var list=terms.length?all.filter(function(p){ var hay=(String(p.title||'')+' '+String(p.text||'')).toLowerCase(); return terms.every(function(t){return hay.indexOf(t)>=0;}); }):all;
-  var info=$('#tip-qinfo'); if(info){ info.hidden=!terms.length; info.textContent=terms.length?('找到 '+list.length+' 則（共 '+all.length+' 則）'):''; }
-  var qx=$('#tip-qx'); if(qx) qx.hidden=!tipQ;
-  if(terms.length&&!list.length){ $('#tips').innerHTML='<div class="empty"><b>找不到「'+esc(tipQ.trim())+'」</b>換個關鍵字試試，或清除搜尋看全部攻略。</div>'; return; }
+  var list=itemsOf('tip').sort(function(a,b){return (a.ts||0)-(b.ts||0);});
   $('#tips').innerHTML=list.length?list.map(function(p){
     var lines=String(p.text||'').split(/\n+/).map(function(s){return s.replace(/^\s*[-•・*]\s*/,'').trim();}).filter(Boolean);
     if(tipEd&&tipEd.id===p.id) return tipEditHtml(p);
-    return '<div class="cp"><h3>'+hiq(p.title,terms)+'</h3>'+
-      (lines.length?'<ul style="margin:8px 0 0;padding-left:20px;font-size:14px;line-height:1.7">'+lines.map(function(s){return '<li>'+hiq(s,terms)+'</li>';}).join('')+'</ul>':'')+
+    return '<div class="cp"><h3>'+esc(p.title)+'</h3>'+
+      (lines.length?'<ul style="margin:8px 0 0;padding-left:20px;font-size:14px;line-height:1.7">'+lines.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')+'</ul>':'')+
       tipGrid(p)+
       '<div class="acts"><button type="button" class="mini" data-tedit="'+p.id+'"><span>編輯</span></button><button type="button" class="mini danger" data-del="'+p.id+'">'+ic('trash')+'<span>刪除</span></button></div></div>';
   }).join(''):'<div class="empty"><b>還沒有攻略</b>記下搭車、退稅、用餐禮儀等注意事項，也能附上截圖。</div>';
@@ -1860,8 +1841,6 @@ function lbSrc(thumb){
   im.addEventListener('dragstart',function(e){ e.preventDefault(); });
 })();
 var pendTip=[];
-document.addEventListener('input',function(e){ if(e.target&&e.target.id==='tip-q'){ tipQ=e.target.value; renderTips(); } });
-document.addEventListener('click',function(e){ var b=e.target.closest&&e.target.closest('#tip-qx'); if(!b) return; tipQ=''; var q=$('#tip-q'); q.value=''; renderTips(); q.focus(); });
 var pendCp=[];
 function renderPendCp(){ var b=$('#c-prevs'); if(!b) return; b.innerHTML=pendCp.map(function(d,i){return '<span class="pt"><img src="'+d+'" alt="預覽 '+(i+1)+'"><button type="button" data-cprem="'+i+'" aria-label="移除這張">×</button></span>';}).join(''); }
 function renderPendTip(){ var b=$('#p-prevs'); if(!b) return; b.innerHTML=pendTip.map(function(d,i){return '<span class="pt"><img src="'+d+'" alt="預覽 '+(i+1)+'"><button type="button" data-prem="'+i+'" aria-label="移除這張">×</button></span>';}).join(''); }
