@@ -465,6 +465,22 @@ html,body{touch-action:manipulation}
 .ccr.warn b{color:var(--kin)}
 .ccr.info b{color:var(--ai)}
 #cc-reset.armed{background:var(--shu);color:var(--on)}
+.nv.usjb{background:var(--fuji);color:var(--on)}
+.nv.usjb .cnt{margin-left:2px;padding:0 6px;border-radius:999px;background:rgba(255,255,255,.28);font-size:11px}
+.usjc{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+.usjc h3{margin:0;font-size:16px;line-height:1.4}
+.usjc ul{margin:0;padding-left:20px;font-size:14px;line-height:1.7}
+.usjform{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:16px;background:var(--fuji-t);border:1.5px solid var(--fuji)}
+.usjform label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:700;color:var(--ink2)}
+.usjform input[type=text],.usjform textarea{width:100%;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--card);font-size:15px;font-weight:400;color:var(--ink)}
+.usjform textarea{resize:vertical;line-height:1.6}
+.ug-imgs{display:flex;flex-direction:column;gap:8px}
+.ug-h{font-size:12.5px;font-weight:700;color:var(--ink2)}
+.ug-h small{font-weight:400}
+.ug-imgs .pthumbs{display:flex;flex-wrap:wrap;gap:10px}
+.ug-imgs .pthumbs:empty{display:none}
+.pthumbs .pt.new img{outline:2px solid var(--fuji);outline-offset:1px}
+.ugadd{--k:var(--fuji);align-self:flex-start}
 .cpadd{--k:var(--shu);margin-top:8px;align-self:flex-start}
 .pthumbs .pt{position:relative;display:inline-block}
 .pthumbs .pt img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block}
@@ -679,7 +695,7 @@ html,body{touch-action:manipulation}
       <div class="who2" id="who2" role="tablist"></div>
       <div id="pack"></div>
     </section>
-    <p class="appver">版本 10/13-d（含入境檢查）</p>
+    <p class="appver">版本 10/13-e（含環球影城攻略）</p>
   </main>
 </div>
 
@@ -1259,7 +1275,7 @@ function bodyHtml(it){
   var endT=(toMin(it.t)!=null&&it.stay)?fromMin(toMin(it.t)+it.stay):'';
   var stay=it.stay?('停留 '+dur(it.stay)+(endT?'，約 '+endT+' 離開':'')):'';
   var meta='<div class="meta">'+(it.custom?'<span class="man">我新增</span>':'')+(it.edited?'<span class="man">已調整</span>':'')+(it.manual?'<span class="man">自訂時間</span>':'')+(stay?'<span>'+esc(stay)+'</span>':'')+'</div>';
-  var acts='<div class="acts">'+(it.map||it.ll?'<a class="nv" href="'+dirUrl(navDest(it))+'" target="_blank" rel="noopener">'+ic('nav')+'導航</a><a class="nv alt" href="'+(it.gurl||mapUrl(navDest(it)))+'" target="_blank" rel="noopener">看地圖</a>':'')+'<button type="button" class="nv alt" data-toggle-edit="'+it.id+'">'+ic('pencil')+'編輯／刪除</button></div>';
+  var acts='<div class="acts">'+(it.map||it.ll?'<a class="nv" href="'+dirUrl(navDest(it))+'" target="_blank" rel="noopener">'+ic('nav')+'導航</a><a class="nv alt" href="'+(it.gurl||mapUrl(navDest(it)))+'" target="_blank" rel="noopener">看地圖</a>':'')+'<button type="button" class="nv alt" data-toggle-edit="'+it.id+'">'+ic('pencil')+'編輯／刪除</button>'+(isUSJ(it)?'<button type="button" class="nv usjb" data-usj="1">'+ic('star')+'環球影城攻略'+(itemsOf('usjg').length?'<span class="cnt">'+itemsOf('usjg').length+'</span>':'')+'</button>':'')+'</div>';
   return '<div class="cbody">'+
     '<h3 class="nm">'+esc(it.name)+'</h3>'+descHtml(it)+meta+(it.warn?'<p class="warnline"><b>需確認　</b>'+esc(it.warn)+'</p>':'')+chipsHtml(it)+acts+editHtml(it)+tkHtml(it)+ptipHtml(it)+infoHtml(it)+guideHtml(it)+jrHtml(it)+
     '<textarea class="note" id="note-'+it.id+'" data-note="'+it.id+'" rows="1" placeholder="我的筆記：想買的、排隊心得、店名…">'+esc(note)+'</textarea></div>';
@@ -1515,7 +1531,7 @@ function openSheet(id){
     '<div class="acts">'+(f.pnr?'<button type="button" class="mini" data-copy="'+esc(f.pnr)+'">'+ic('copy')+'複製訂位代號</button>':'')+'<button type="button" class="mini" data-fedit="'+f.id+'">'+ic('pencil')+'編輯</button><button type="button" class="mini danger" data-del="'+f.id+'">'+ic('trash')+'<span>刪除</span></button></div>';
   $('#sheet').hidden=false;
 }
-function closeSheet(){ sheetId=null; routeLeg=null; $('#sheet').hidden=true; }
+function closeSheet(){ usjOpen=false; usjEd=null; sheetId=null; routeLeg=null; $('#sheet').hidden=true; }
 function startEditFlight(id){
   var f=S.items[id]; if(!f) return; closeSheet(); editFlight=id; openForm('flight');
   $('#f-dir').value=f.dir||'去程'; $('#f-date').value=f.date||''; $('#f-air').value=f.air||''; $('#f-no').value=f.no||'';
@@ -1724,6 +1740,81 @@ function renderCustoms(){
 }
 document.addEventListener('change',function(e){ var t=e.target; if(!t||!t.hasAttribute||!t.hasAttribute('data-cc')) return; var st=Object.assign({},ccState()); var i=t.getAttribute('data-cc'); if(t.checked) st[i]=1; else delete st[i]; S.notes.cc=st; queueNotes(); renderCustoms(); });
 document.addEventListener('click',function(e){ var b=e.target.closest&&e.target.closest('#cc-reset'); if(!b) return; if(!b.classList.contains('armed')){ b.classList.add('armed'); b.textContent='再按一次確認取消'; setTimeout(function(){ if(b.isConnected){ b.classList.remove('armed'); b.textContent='全部取消勾選'; } },3000); return; } S.notes.cc={}; queueNotes(); renderCustoms(); b.classList.remove('armed'); b.textContent='全部取消勾選'; });
+/* ---------- 環球影城攻略（兩天的環球影城行程卡共用） ---------- */
+function isUSJ(it){ return it&&(it.id==='d3-3'||it.id==='d4-2'||it.map===USJ||/環球影城|USJ|ユニバーサル/i.test(it.name||'')); }
+var usjOpen=false, usjEd=null;
+function usjImgs(id){ return itemsOf('tphoto').filter(function(k){return k.ref===id;}).sort(function(a,b){return (a.ts||0)-(b.ts||0);}); }
+function usjList(){ return itemsOf('usjg').sort(function(a,b){return (a.ord!=null?a.ord:a.ts||0)-(b.ord!=null?b.ord:b.ts||0);}); }
+function usjFormHtml(){
+  var e=usjEd, keep=e.keep.map(function(pid){ var k=S.items[pid]; return k?'<span class="pt"><img src="'+k.img+'" alt="已存的圖片"><button type="button" data-usjrm="k'+pid+'" aria-label="移除這張">×</button></span>':''; }).join('');
+  var adds=e.adds.map(function(d,i){ return '<span class="pt new"><img src="'+d+'" alt="新加的圖片"><button type="button" data-usjrm="a'+i+'" aria-label="移除這張">×</button></span>'; }).join('');
+  return '<div class="usjform" id="usjform">'+
+    '<label>標題<input id="ug-title" type="text" placeholder="例：快速通關怎麼買、必玩設施順序" value="'+esc(e.title)+'"></label>'+
+    '<label>內容<textarea id="ug-text" rows="6" placeholder="一行一個重點，會自動排成條列">'+esc(e.text)+'</textarea></label>'+
+    '<div class="ug-imgs"><div class="ug-h">圖片 <small>'+(e.keep.length+e.adds.length)+' 張・按 × 移除</small></div><div class="pthumbs">'+keep+adds+'</div>'+
+    '<label class="jr-add ugadd">'+ic('plus')+'加入圖片<input type="file" accept="image/*" multiple id="ug-img" data-usjimg="1"></label></div>'+
+    '<div class="fbtns"><button type="button" class="btn shu sm" id="ug-save">儲存</button><button type="button" class="btn ghost sm" style="color:var(--ink)" id="ug-cancel">取消</button></div></div>';
+}
+function renderUsj(){
+  if(!usjOpen) return;
+  var list=usjList();
+  var html='<div class="sh-head"><b>'+ic('star')+' 環球影城攻略</b><button type="button" class="mini" data-sclose="1">'+ic('x')+'關閉</button></div>'+
+    '<p class="lead" style="margin:0">11/4、11/5 兩天的環球影城行程共用這份攻略。</p>';
+  if(usjEd&&!usjEd.id) html+=usjFormHtml();
+  else html+='<button type="button" class="btn shu sm" id="ug-new" style="align-self:flex-start">'+ic('plus')+'新增攻略</button>';
+  html+=list.length?list.map(function(g,i){
+    if(usjEd&&usjEd.id===g.id) return usjFormHtml();
+    var lines=String(g.text||'').split(/\n+/).map(function(x){return x.replace(/^\s*[-•・*]\s*/,'').trim();}).filter(Boolean);
+    var imgs=usjImgs(g.id);
+    return '<div class="usjc"><h3>'+esc(g.title||'未命名攻略')+'</h3>'+
+      (lines.length?'<ul>'+lines.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>':'')+
+      (imgs.length?'<div class="jr-g">'+imgs.map(function(k,j){return '<img data-lbg="'+g.id+'" data-i="'+j+'" src="'+k.img+'" alt="攻略圖片 '+(j+1)+'">';}).join('')+'</div>':'')+
+      '<div class="acts">'+(i>0?'<button type="button" class="mini" data-usjmv="'+g.id+'|-1" aria-label="往上移">↑</button>':'')+(i<list.length-1?'<button type="button" class="mini" data-usjmv="'+g.id+'|1" aria-label="往下移">↓</button>':'')+
+      '<button type="button" class="mini" data-usjed="'+g.id+'">'+ic('pencil')+'編輯</button><button type="button" class="mini danger" data-del="'+g.id+'">'+ic('trash')+'<span>刪除</span></button></div></div>';
+  }).join(''):(usjEd?'':'<div class="empty"><b>還沒有攻略</b>把排隊順序、快速通關、必吃美食、園區地圖截圖記在這裡，入園時直接打開看。</div>');
+  var keepScroll=$('#sheet-in').scrollTop;
+  var tTitle=$('#ug-title'), tText=$('#ug-text'); if(usjEd&&tTitle){ usjEd.title=tTitle.value; usjEd.text=tText.value; }
+  $('#sheet-in').innerHTML=html; $('#sheet-in').setAttribute('aria-label','環球影城攻略'); $('#sheet-in').scrollTop=keepScroll;
+  $('#sheet').hidden=false;
+}
+function openUsj(){ usjOpen=true; usjEd=null; sheetId=null; routeLeg=null; renderUsj(); $('#sheet-in').scrollTop=0; }
+function usjSyncForm(){ var a=$('#ug-title'), b=$('#ug-text'); if(usjEd&&a){ usjEd.title=a.value; usjEd.text=b.value; } }
+document.addEventListener('click',function(e){
+  var t=e.target.closest&&e.target.closest('[data-usj],#ug-new,[data-usjed],[data-usjrm],#ug-save,#ug-cancel,[data-usjmv]'); if(!t) return;
+  e.stopPropagation();
+  if(t.hasAttribute('data-usj')){ openUsj(); return; }
+  if(t.id==='ug-new'){ usjEd={id:null,title:'',text:'',keep:[],adds:[]}; renderUsj(); var f=$('#ug-title'); if(f) f.focus(); return; }
+  if(t.hasAttribute('data-usjed')){ var g=S.items[t.getAttribute('data-usjed')]; if(!g) return; usjEd={id:g.id,title:g.title||'',text:g.text||'',keep:usjImgs(g.id).map(function(k){return k.id;}),adds:[]}; renderUsj(); var fe=document.getElementById('usjform'); if(fe) fe.scrollIntoView({block:'nearest'}); return; }
+  if(t.hasAttribute('data-usjrm')){ usjSyncForm(); var r=t.getAttribute('data-usjrm'); if(r[0]==='k') usjEd.keep=usjEd.keep.filter(function(x){return x!==r.slice(1);}); else usjEd.adds.splice(parseInt(r.slice(1),10),1); renderUsj(); return; }
+  if(t.id==='ug-cancel'){ usjEd=null; renderUsj(); return; }
+  if(t.hasAttribute('data-usjmv')){
+    var pr=t.getAttribute('data-usjmv').split('|'), list=usjList(), i=list.findIndex(function(x){return x.id===pr[0];}), j=i+parseInt(pr[1],10);
+    if(i<0||j<0||j>=list.length) return; var tmp=list[i]; list[i]=list[j]; list[j]=tmp;
+    Promise.all(list.map(function(x,k){ if(x.ord===k) return null; var y=Object.assign({},x,{ord:k}); return saveItem(y); })).then(function(){ renderUsj(); renderDay(); });
+    renderUsj(); return;
+  }
+  if(t.id==='ug-save'){
+    usjSyncForm(); var ed=usjEd, title=(ed.title||'').trim(), text=(ed.text||'').trim();
+    if(!title&&!text&&!ed.keep.length&&!ed.adds.length){ toast('先寫標題、內容或加圖片'); return; }
+    t.disabled=true;
+    var old=ed.id&&S.items[ed.id], id=old?old.id:uid8('usjg'), now=Date.now();
+    var rec=Object.assign({},old||{},{id:id,kind:'usjg',title:title,text:text,ts:old?(old.ts||now):now});
+    if(rec.ord==null) rec.ord=old?undefined:usjList().length;
+    if(rec.ord===undefined) delete rec.ord;
+    var removed=old?usjImgs(id).filter(function(k){return ed.keep.indexOf(k.id)<0;}):[];
+    var chain=saveItem(rec);
+    removed.forEach(function(k){ chain=chain.then(function(){ return delItem(k.id); }); });
+    ed.adds.forEach(function(d,ix){ chain=chain.then(function(){ return saveItem({id:uid8('tphoto'),kind:'tphoto',ref:id,img:d,ts:now+1+ix}); }); });
+    chain.then(function(){ usjEd=null; renderUsj(); renderDay(); toast(old?'攻略已更新':'攻略已新增'); },function(){ t.disabled=false; toast('沒能儲存，請再試一次'); });
+    return;
+  }
+},true);
+document.addEventListener('change',function(e){
+  var t=e.target; if(!t||!t.hasAttribute||!t.hasAttribute('data-usjimg')) return;
+  var fs=Array.prototype.slice.call(t.files||[]); if(!fs.length||!usjEd) return;
+  usjSyncForm(); toast('圖片處理中…');
+  fs.reduce(function(pr,fl){ return pr.then(function(){ return shrink(fl).then(function(d){ if(d) usjEd.adds.push(d); else toast('有一張圖片無法處理，已略過'); }); }); },Promise.resolve()).then(function(){ renderUsj(); });
+});
 function renderCodes(){
   if(!$('#codes')) return;
   var rows=[];
@@ -1732,7 +1823,7 @@ function renderCodes(){
     return '<div class="cd"><b>'+esc(r[2])+'</b><button type="button" class="mini" data-copy="'+esc(r[2])+'">'+ic('copy')+'複製</button><small>第 '+r[0].n+' 天　'+esc(r[1].name)+'　'+esc(r[1].bookLabel||'')+'</small></div>';
   }).join(''):'<div class="empty"><b>還沒有預約代號</b>在行程卡或導遊頁的預約欄貼上代號，就會出現在這裡。</div>';
 }
-function renderTools(){ renderOverview(); renderPhrases(); renderSos(); renderTickets(); renderTips(); renderCoupons(); renderCodes(); renderCustoms(); }
+function renderTools(){ renderOverview(); renderPhrases(); renderSos(); renderTickets(); renderTips(); renderCoupons(); renderCodes(); renderCustoms(); if(usjOpen&&!usjEd) renderUsj(); }
 
 /* 更新（雲端同步或其他裝置變更）時，不打斷正在輸入的欄位 */
 function renderLive(){
@@ -2042,7 +2133,7 @@ document.addEventListener('click',function(e){
   }
   if(t.hasAttribute('data-gowx')){ showTab('plan'); selectDay(parseInt(t.getAttribute('data-gowx'),10)); return; }
   if(t.id==='lb-x'||t.id==='lb'){ if(e.target.id==='lb-img') return; $('#lb').hidden=true; lbCur=null; zReset(); return; }
-  if(t.hasAttribute('data-del')){ var id=t.getAttribute('data-del'); armDel(t,function(){ var was=S.items[id]; if(was&&(was.kind==='tip'||was.kind==='coupon')){ itemsOf('tphoto').filter(function(k){return k.ref===id;}).forEach(function(k){ delItem(k.id); }); } delItem(id).then(function(){ if(sheetId===id) closeSheet(); renderTools(); if(was&&was.ref){ renderDay(); } toast('已刪除'); }); }); return; }
+  if(t.hasAttribute('data-del')){ var id=t.getAttribute('data-del'); armDel(t,function(){ var was=S.items[id]; if(was&&(was.kind==='tip'||was.kind==='coupon'||was.kind==='usjg')){ itemsOf('tphoto').filter(function(k){return k.ref===id;}).forEach(function(k){ delItem(k.id); }); } delItem(id).then(function(){ if(sheetId===id) closeSheet(); renderTools(); if(was&&was.ref){ renderDay(); } toast('已刪除'); }); }); return; }
   if(t.hasAttribute('data-used')){ var c=S.items[t.getAttribute('data-used')]; if(c){ c.used=!c.used; saveItem(c).then(renderTools); renderTools(); } return; }
   if(t.hasAttribute('data-jump')){
     var f=findItem(t.getAttribute('data-jump')); if(!f) return;
