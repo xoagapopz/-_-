@@ -440,6 +440,31 @@ html,body{touch-action:manipulation}
 .tsearch button{position:absolute;right:8px;width:26px;height:26px;border-radius:50%;border:0;background:var(--line);color:var(--ink);font-size:16px;line-height:1;padding:0}
 .tq-info{margin-top:6px;font-size:12.5px;color:var(--ink2)}
 #tips mark{background:var(--kin-t);color:var(--ink);border-radius:3px;padding:0 1px}
+.ccai{display:flex;align-items:center;gap:12px;margin-top:12px;padding:14px;border-radius:16px;background:var(--ai);color:var(--on);text-decoration:none;box-shadow:0 4px 14px var(--shadow)}
+.ccai-ic{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.18)}
+.ccai-ic .ic{width:24px;height:24px}
+.ccai-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ccai-t b{font-size:16px}
+.ccai-t small{font-size:12.5px;opacity:.9;line-height:1.45}
+.ccai-go{flex:none;font-weight:700;font-size:13px}
+.ccnote{margin:8px 0 0;font-size:12px;color:var(--ink2);line-height:1.6}
+.ccnote a{color:var(--ai)}
+#cc-list .pki{cursor:pointer;align-items:flex-start;padding:10px 12px}
+#cc-list .pki input{margin-top:2px}
+.cct{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.cct .tx2{font-size:14.5px;line-height:1.5}
+.cct small{font-size:12px;color:var(--ink2);line-height:1.5}
+#cc-list .pki.done .tx2{color:var(--ink2)}
+.ccdone{display:flex;align-items:center;gap:6px;margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--matcha-t);color:var(--matcha);font-weight:700}
+.cch{margin:22px 0 8px;font-size:17px}
+#cc-rules{display:flex;flex-direction:column;gap:8px}
+.ccr{padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--card)}
+.ccr b{display:block;font-size:14px;margin-bottom:4px}
+.ccr ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.7}
+.ccr.bad b{color:var(--shu)}
+.ccr.warn b{color:var(--kin)}
+.ccr.info b{color:var(--ai)}
+#cc-reset.armed{background:var(--shu);color:var(--on)}
 .cpadd{--k:var(--shu);margin-top:8px;align-self:flex-start}
 .pthumbs .pt{position:relative;display:inline-block}
 .pthumbs .pt img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block}
@@ -500,7 +525,7 @@ html,body{touch-action:manipulation}
         <button type="button" data-seg="tips" aria-selected="false">攻略</button>
         <button type="button" data-seg="jp" aria-selected="false">日文會話</button>
         <button type="button" data-seg="coupon" aria-selected="false">折價券</button>
-        <button type="button" data-seg="codes" aria-selected="false">預約代號</button>
+        <button type="button" data-seg="customs" aria-selected="false">入境檢查</button>
       </div>
 
       <div id="seg-sos">
@@ -585,10 +610,21 @@ html,body{touch-action:manipulation}
         <div class="list" id="coupons" style="margin-top:12px"></div>
       </div>
 
-      <div id="seg-codes" hidden>
-        <div class="sec-h"><h2>預約代號總覽</h2></div>
-        <p class="lead">在行程卡或導遊頁填的預約代號都會集中在這裡。</p>
-        <div class="list" id="codes" style="margin-top:10px"></div>
+      <div id="seg-customs" hidden>
+        <div class="sec-h"><h2>回台入境檢查</h2><small id="cc-count"></small></div>
+        <p class="lead">回台灣前整理行李時，逐項打勾確認。不確定能不能帶，就走紅線找海關申報。</p>
+        <a class="ccai" href="https://ai-customs.tw/" target="_blank" rel="noopener">
+          <span class="ccai-ic"><svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/><path d="M8.5 11h5M11 8.5v5"/></svg></span>
+          <span class="ccai-t"><b>台灣入境 AI 放大鏡</b><small>拍商品正面和背面成分標示，AI 幫你判斷能不能帶回台灣</small></span>
+          <span class="ccai-go">開啟 ›</span>
+        </a>
+        <p class="ccnote">這是民間網站，不是政府官方服務，結果僅供參考。以海關和防檢署公告為準。</p>
+        <div class="bar big" style="margin-top:12px"><i id="cc-bar" style="width:0%"></i></div>
+        <div id="cc-list"></div>
+        <div class="acts" style="margin-top:12px"><button type="button" class="mini" id="cc-reset">全部取消勾選</button></div>
+        <h3 class="cch">規定速查</h3>
+        <div id="cc-rules"></div>
+        <p class="ccnote">整理自關務署、防檢署公告與新聞報導（2026 年）。出發前可再到 <a href="https://web.customs.gov.tw/" target="_blank" rel="noopener">關務署網站</a> 確認。</p>
       </div>
     </section>
 
@@ -643,7 +679,7 @@ html,body{touch-action:manipulation}
       <div class="who2" id="who2" role="tablist"></div>
       <div id="pack"></div>
     </section>
-    <p class="appver">版本 10/13-c（含折價券加圖片、攻略搜尋）</p>
+    <p class="appver">版本 10/13-d（含入境檢查）</p>
   </main>
 </div>
 
@@ -1652,14 +1688,51 @@ function renderTips(){
       '<div class="acts"><button type="button" class="mini" data-tedit="'+p.id+'"><span>編輯</span></button><button type="button" class="mini danger" data-del="'+p.id+'">'+ic('trash')+'<span>刪除</span></button></div></div>';
   }).join(''):'<div class="empty"><b>還沒有攻略</b>記下搭車、退稅、用餐禮儀等注意事項，也能附上截圖。</div>';
 }
+/* ---------- 回台入境檢查 ---------- */
+var CC=[
+ ['食物','沒有肉製品：肉乾、香腸、火腿、肉鬆，以及含肉的零食或內餡','日本帶回的肉製品，真空包裝也不行'],
+ ['食物','泡麵、咖哩、調理包含肉的，已用 AI 放大鏡拍成分確認','經高溫殺菌、可常溫保存的罐頭和軟罐頭可以帶，肉塊乾燥包不行'],
+ ['食物','沒有新鮮水果、蔬菜、種子、植物或土壤','果乾、糖漬、冷凍乾燥等加工過的水果通常可以'],
+ ['食物','沒有生雞蛋、鮮乳等生鮮動物產品',''],
+ ['菸酒','酒類合計 1.5 公升以內（18 歲以上）','超過要走紅線申報，最多 5 公升'],
+ ['菸酒','捲菸 200 支（1 條）以內，或雪茄 25 支、菸絲 1 磅（20 歲以上）',''],
+ ['菸酒','加熱菸只帶衛福部核定的品項，200 支以內','未核定的加熱菸，帶 1 支也違法'],
+ ['菸酒','沒有電子菸、菸彈或相關零件',''],
+ ['行李','行動電源、備用鋰電池放隨身行李，不放託運',''],
+ ['行李','藥品是自用、數量合理，處方藥帶著處方或說明',''],
+ ['錢','新台幣 10 萬元、人民幣 2 萬元以內','超過的部分會被封存在海關，出境時才能領回'],
+ ['錢','外幣現鈔合計等值 1 萬美元以內；超過要申報',''],
+ ['購物','這趟買的東西總價值在新台幣 3.5 萬元以內','超過要走紅線申報、補稅（菸酒和管制品另計）']
+];
+var CC_RULES=[
+ ['bad','禁止攜帶',['肉類和肉製品（含真空包裝、肉乾、含肉內餡）','新鮮水果、蔬菜、種子、植物','電子菸及零件、未核定的加熱菸','毒品、槍械、仿冒品']],
+ ['warn','限量免稅（超過要申報）',['酒 1.5 公升（18 歲以上）','捲菸 200 支／雪茄 25 支／菸絲 1 磅（20 歲以上）','核定加熱菸 200 支','行李物品總值新台幣 3.5 萬元']],
+ ['info','現金與貴重物品',['新台幣 10 萬元、人民幣 2 萬元為上限，超過封存','外幣合計超過 1 萬美元要申報','黃金超過 2 萬美元要申報']],
+ ['bad','罰則參考',['從非洲豬瘟疫區帶豬肉製品：初犯罰 20 萬元，再犯 100 萬元','違規帶動物產品：最高可罰 100 萬元','違規帶新鮮水果：3,000～15,000 元','菸酒超量走綠線沒申報：沒入並罰款','未核定加熱菸：5 萬～500 萬元']]
+];
+function ccState(){ return (S.notes&&S.notes.cc&&typeof S.notes.cc==='object')?S.notes.cc:{}; }
+function renderCustoms(){
+  var box=$('#cc-list'); if(!box) return;
+  var st=ccState(), done=0, cats=[], by={};
+  CC.forEach(function(r,i){ if(st[i]) done++; if(!by[r[0]]){ by[r[0]]=[]; cats.push(r[0]); } by[r[0]].push(i); });
+  $('#cc-count').textContent='已確認 '+done+'/'+CC.length;
+  $('#cc-bar').style.width=Math.round(done*100/CC.length)+'%';
+  box.innerHTML=cats.map(function(c){
+    return '<div class="phcat">'+esc(c)+'</div><div class="pk">'+by[c].map(function(i){ var r=CC[i]; return '<label class="pki'+(st[i]?' done':'')+'"><input type="checkbox" data-cc="'+i+'"'+(st[i]?' checked':'')+'><span class="cct"><span class="tx2">'+esc(r[1])+'</span>'+(r[2]?'<small>'+esc(r[2])+'</small>':'')+'</span></label>'; }).join('')+'</div>';
+  }).join('')+(done===CC.length?'<div class="ccdone">'+ic('check')+'全部確認完成，可以安心走綠線！</div>':'');
+  $('#cc-rules').innerHTML=CC_RULES.map(function(g){ return '<div class="ccr '+g[0]+'"><b>'+esc(g[1])+'</b><ul>'+g[2].map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>'; }).join('');
+}
+document.addEventListener('change',function(e){ var t=e.target; if(!t||!t.hasAttribute||!t.hasAttribute('data-cc')) return; var st=Object.assign({},ccState()); var i=t.getAttribute('data-cc'); if(t.checked) st[i]=1; else delete st[i]; S.notes.cc=st; queueNotes(); renderCustoms(); });
+document.addEventListener('click',function(e){ var b=e.target.closest&&e.target.closest('#cc-reset'); if(!b) return; if(!b.classList.contains('armed')){ b.classList.add('armed'); b.textContent='再按一次確認取消'; setTimeout(function(){ if(b.isConnected){ b.classList.remove('armed'); b.textContent='全部取消勾選'; } },3000); return; } S.notes.cc={}; queueNotes(); renderCustoms(); b.classList.remove('armed'); b.textContent='全部取消勾選'; });
 function renderCodes(){
+  if(!$('#codes')) return;
   var rows=[];
   DAYS.forEach(function(d){ d.items.forEach(function(it){ if(it.book&&S.codes[it.id]) rows.push([d,it,S.codes[it.id]]); }); });
   $('#codes').innerHTML=rows.length?rows.map(function(r){
     return '<div class="cd"><b>'+esc(r[2])+'</b><button type="button" class="mini" data-copy="'+esc(r[2])+'">'+ic('copy')+'複製</button><small>第 '+r[0].n+' 天　'+esc(r[1].name)+'　'+esc(r[1].bookLabel||'')+'</small></div>';
   }).join(''):'<div class="empty"><b>還沒有預約代號</b>在行程卡或導遊頁的預約欄貼上代號，就會出現在這裡。</div>';
 }
-function renderTools(){ renderOverview(); renderPhrases(); renderSos(); renderTickets(); renderTips(); renderCoupons(); renderCodes(); }
+function renderTools(){ renderOverview(); renderPhrases(); renderSos(); renderTickets(); renderTips(); renderCoupons(); renderCodes(); renderCustoms(); }
 
 /* 更新（雲端同步或其他裝置變更）時，不打斷正在輸入的欄位 */
 function renderLive(){
@@ -1699,7 +1772,7 @@ function showTab(name){
   window.scrollTo(0,0);
 }
 function showSeg(name){
-  ['sos','ticket','tips','jp','coupon','codes'].forEach(function(n){ $('#seg-'+n).hidden=(n!==name); });
+  ['sos','ticket','tips','jp','coupon','customs'].forEach(function(n){ $('#seg-'+n).hidden=(n!==name); });
   $$('#seg button').forEach(function(b){ b.setAttribute('aria-selected',String(b.getAttribute('data-seg')===name)); });
 }
 function countdown(){
