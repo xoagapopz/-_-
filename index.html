@@ -284,6 +284,14 @@ button:active,.btn:active,.nv:active,.mini:active{transform:scale(.95)}
 .ptip{display:flex;gap:8px;align-items:flex-start;padding:9px 11px;border-radius:12px;background:var(--ai-t);font-size:13.5px;line-height:1.55}
 .ptip .ic{color:var(--ai);margin-top:2px}
 .ptip b{color:var(--ai)}
+.infobox{cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform .15s ease,box-shadow .15s ease}
+.infobox .ib{flex:1;min-width:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.infobox .ibh{display:block;margin-top:2px;font-size:11px;color:var(--ink2);white-space:normal}
+.infobox .ibe{font-style:normal;color:var(--ink2)}
+.infobox.pressing{transform:scale(.98);box-shadow:0 0 0 2px var(--ai)}
+.infobox.editing{cursor:auto;-webkit-user-select:auto;user-select:auto;box-shadow:0 0 0 2px var(--ai)}
+.infobox.editing .ib{display:flex;flex-direction:column;gap:6px;white-space:normal}
+.infobox.editing .infota{margin-top:2px}
 .jr{display:flex;flex-direction:column;gap:8px}
 .jr-h{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:700}
 .jr-g{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
@@ -665,6 +673,7 @@ var IC = {
   phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>',
   route:'<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>',
   check:'<path d="M20 6 9 17l-5-5"/>',
+  alert:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
   file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 18h4"/>',
   star:'<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>',
   camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
@@ -1095,12 +1104,36 @@ function routeUrl(day){
   var w=u.slice(1,-1).slice(0,9);
   return 'https://www.google.com/maps/dir/?api=1&origin='+enc(u[0])+'&destination='+enc(u[u.length-1])+(w.length?'&waypoints='+w.map(enc).join('%7C'):'')+'&travelmode=transit';
 }
+var editInfo=null;
 function infoHtml(it){
   if(!it.info) return '';
   var ed=S.notes['i_'+it.id], v=(ed!=null)?ed:it.info;
-  return '<details class="gd infod" data-infod="'+it.id+'"><summary>注意事項<span>'+ic('chev')+'</span></summary><div class="gdl"><textarea class="infota" id="info-'+it.id+'" data-inote="'+it.id+'" rows="3" aria-label="注意事項">'+esc(v)+'</textarea>'+
-    (ed!=null?'<div class="acts"><button type="button" class="mini" data-inreset="'+it.id+'">還原預設內容</button></div>':'')+'</div></details>';
+  if(editInfo===it.id){
+    return '<div class="ptip infobox editing" data-infobox="'+it.id+'">'+ic('alert')+'<div class="ib"><b>注意事項　</b><span class="ibh">編輯中，內容會自動儲存</span>'+
+      '<textarea class="infota" id="info-'+it.id+'" data-inote="'+it.id+'" rows="3" aria-label="注意事項">'+esc(v)+'</textarea>'+
+      '<div class="acts"><button type="button" class="mini on" data-indone="'+it.id+'">'+ic('check')+'完成</button>'+(ed!=null?'<button type="button" class="mini" data-inreset="'+it.id+'">還原預設內容</button>':'')+'</div></div></div>';
+  }
+  return '<div class="ptip infobox" data-infobox="'+it.id+'" data-lp="'+it.id+'" role="button" tabindex="0" aria-label="注意事項，長按編輯">'+ic('alert')+'<span class="ib"><b>注意事項　</b>'+(v.trim()?esc(v):'<i class="ibe">沒有內容，長按新增</i>')+'<small class="ibh">長按編輯</small></span></div>';
 }
+function swapInfo(id){
+  var box=document.querySelector('[data-infobox="'+id+'"]'), f=findItem(id), it=f?f[1]:findCustom(id);
+  if(!box||!it) return;
+  var tmp=document.createElement('div'); tmp.innerHTML=infoHtml(it); box.replaceWith(tmp.firstChild);
+  if(editInfo===id){ var ta=document.getElementById('info-'+id); if(ta){ autosize(ta); ta.focus(); try{ ta.setSelectionRange(ta.value.length,ta.value.length); }catch(e){} } }
+}
+(function(){
+  var timer=null, sx=0, sy=0, tid=null;
+  function clear(){ clearTimeout(timer); timer=null; var b=document.querySelector('.infobox.pressing'); if(b) b.classList.remove('pressing'); }
+  document.addEventListener('pointerdown',function(e){
+    var b=e.target.closest&&e.target.closest('[data-lp]'); if(!b) return;
+    tid=b.getAttribute('data-lp'); sx=e.clientX; sy=e.clientY; b.classList.add('pressing');
+    timer=setTimeout(function(){ timer=null; b.classList.remove('pressing'); if(navigator.vibrate){ try{ navigator.vibrate(15); }catch(x){} } var prev=editInfo; editInfo=tid; if(prev&&prev!==tid) swapInfo(prev); swapInfo(tid); },500);
+  });
+  document.addEventListener('pointermove',function(e){ if(timer&&Math.hypot(e.clientX-sx,e.clientY-sy)>10) clear(); });
+  document.addEventListener('pointerup',clear); document.addEventListener('pointercancel',clear);
+  document.addEventListener('contextmenu',function(e){ if(e.target.closest&&e.target.closest('[data-lp]')) e.preventDefault(); });
+  document.addEventListener('keydown',function(e){ var b=e.target.closest&&e.target.closest('[data-lp]'); if(b&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); editInfo=b.getAttribute('data-lp'); swapInfo(editInfo); } });
+})();
 function guideHtml(it){
   if(!it.g||!it.g.length) return '';
   var rows=it.g.map(function(r){
@@ -1839,9 +1872,10 @@ function resetForm(k){
 
 /* ---------- 事件 ---------- */
 document.addEventListener('click',function(e){
-  var t=e.target.closest('[data-day],[data-tab],[data-seg],[data-copy],[data-lb],[data-del],[data-used],[data-jump],[data-openform],[data-closeform],[data-fillflight],[data-toggle-edit],[data-reset],[data-inreset],[data-lbg],#lb-prev,#lb-next,[data-prem],[data-delx],[data-addopen],[data-addsave],[data-addcancel],[data-gowx],#lb-del,[data-fview],[data-fedit],[data-sclose],[data-delo],[data-undel],[data-tkopen],[data-tksave],[data-pdf],#pv-x,[data-tkwho],[data-route],[data-rsel],[data-redit],[data-rnew],#r-cancel,#r-save,[data-rdel],[data-who],[data-pkx],[data-say],[data-jedit],[data-jdel],#sheet,#h-edit,#h-save,#j-save,#pk-add,#lb-x,#lb,#f-save,#c-save,#k-save,#p-save,#s-save');
+  var t=e.target.closest('[data-day],[data-tab],[data-seg],[data-copy],[data-lb],[data-del],[data-used],[data-jump],[data-openform],[data-closeform],[data-fillflight],[data-toggle-edit],[data-reset],[data-inreset],[data-indone],[data-lbg],#lb-prev,#lb-next,[data-prem],[data-delx],[data-addopen],[data-addsave],[data-addcancel],[data-gowx],#lb-del,[data-fview],[data-fedit],[data-sclose],[data-delo],[data-undel],[data-tkopen],[data-tksave],[data-pdf],#pv-x,[data-tkwho],[data-route],[data-rsel],[data-redit],[data-rnew],#r-cancel,#r-save,[data-rdel],[data-who],[data-pkx],[data-say],[data-jedit],[data-jdel],#sheet,#h-edit,#h-save,#j-save,#pk-add,#lb-x,#lb,#f-save,#c-save,#k-save,#p-save,#s-save');
   if(!t) return;
-  if(t.hasAttribute('data-inreset')){ var irid=t.getAttribute('data-inreset'); delete S.notes['i_'+irid]; renderDay(); queueNotes(); toast('已還原預設內容'); return; }
+  if(t.hasAttribute('data-inreset')){ var irid=t.getAttribute('data-inreset'); delete S.notes['i_'+irid]; queueNotes(); swapInfo(irid); toast('已還原預設內容'); return; }
+  if(t.hasAttribute('data-indone')){ var idn=t.getAttribute('data-indone'); editInfo=null; flushNotes(); swapInfo(idn); toast('注意事項已儲存'); return; }
   if(t.hasAttribute('data-day')){ selectDay(parseInt(t.getAttribute('data-day'),10)); return; }
   if(t.hasAttribute('data-tab')){ showTab(t.getAttribute('data-tab')); return; }
   if(t.hasAttribute('data-seg')){ showSeg(t.getAttribute('data-seg')); return; }
