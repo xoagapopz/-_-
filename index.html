@@ -1,9 +1,9 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>無尾熊離家記</title>
 <!-- 一般瀏覽器 Favicon -->
-<link rel="icon" href="./favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.ico" sizes="any">
 <!-- iOS 主畫面 Icon -->
-<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <!-- iOS 主畫面顯示名稱 -->
 <meta name="apple-mobile-web-app-title" content="無尾熊離家記">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -426,6 +426,7 @@ input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea{fo
 html,body{touch-action:manipulation}
 .infota{width:100%;min-height:64px;resize:none;overflow:hidden;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);line-height:1.6}
 .pthumbs{display:flex;flex-wrap:wrap;gap:8px}
+.cpadd{--k:var(--shu);margin-top:8px;align-self:flex-start}
 .pthumbs .pt{position:relative;display:inline-block}
 .pthumbs .pt img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block}
 .pthumbs .pt button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:0;background:var(--ink);color:var(--paper);font-size:14px;line-height:1;padding:0}
@@ -561,7 +562,7 @@ html,body{touch-action:manipulation}
             <label>適用店家<input id="c-shop" type="text" placeholder="店名或連鎖"></label>
             <label>到期日<input id="c-exp" type="date"></label>
             <label class="full">折扣碼或說明<input id="c-code" type="text" placeholder="折扣碼、使用條件"></label>
-            <div class="full pick"><label style="flex:1 1 180px">QR Code 或截圖<input id="c-img" type="file" accept="image/*"></label><img id="c-prev" alt="預覽" hidden></div>
+            <div class="full pick"><label style="flex:1 1 180px">QR Code 或截圖（可選多張）<input id="c-img" type="file" accept="image/*" multiple></label><img id="c-prev" alt="預覽" hidden><div class="pthumbs" id="c-prevs"></div></div>
           </div>
           <div class="fbtns"><button class="btn shu sm" type="button" id="c-save">儲存折價券</button><button class="btn ghost sm" type="button" data-closeform="coupon">取消</button></div>
         </div>
@@ -1584,7 +1585,8 @@ function renderCoupons(){
     var expired=c.exp&&c.exp<ts;
     return '<div class="cp'+(c.used?' used':'')+'"><h3>'+esc(c.title)+'</h3><div class="meta">'+(c.shop?'<span>'+esc(c.shop)+'</span>':'')+(c.exp?'<span>到期 '+esc(fmtDate(c.exp))+(expired?'（已過期）':'')+'</span>':'')+(c.used?'<span>已使用</span>':'')+'</div>'+
       (c.code?'<div class="code">'+esc(c.code)+'</div>':'')+
-      (c.img?'<img class="thumb" data-lb="'+c.id+'" src="'+c.img+'" alt="折價券圖片">':'')+
+      tipGrid(c)+
+      '<label class="jr-add cpadd">'+ic('plus')+'新增圖片<input type="file" accept="image/*" multiple id="cpa-'+c.id+'" data-cpadd="'+c.id+'"></label>'+
       '<div class="acts">'+(c.code?'<button type="button" class="mini" data-copy="'+esc(c.code)+'">'+ic('copy')+'複製折扣碼</button>':'')+'<button type="button" class="mini'+(c.used?' on':'')+'" data-used="'+c.id+'">'+ic('check')+(c.used?'已使用':'標示已使用')+'</button><button type="button" class="mini danger" data-del="'+c.id+'">'+ic('trash')+'<span>刪除</span></button></div></div>';
   }).join(''):'<div class="empty"><b>還沒有折價券</b>把藥妝、電器、餐廳的折價 QR Code 截圖放進來，結帳時直接點開出示。</div>';
 }
@@ -1839,6 +1841,8 @@ function lbSrc(thumb){
   im.addEventListener('dragstart',function(e){ e.preventDefault(); });
 })();
 var pendTip=[];
+var pendCp=[];
+function renderPendCp(){ var b=$('#c-prevs'); if(!b) return; b.innerHTML=pendCp.map(function(d,i){return '<span class="pt"><img src="'+d+'" alt="預覽 '+(i+1)+'"><button type="button" data-cprem="'+i+'" aria-label="移除這張">×</button></span>';}).join(''); }
 function renderPendTip(){ var b=$('#p-prevs'); if(!b) return; b.innerHTML=pendTip.map(function(d,i){return '<span class="pt"><img src="'+d+'" alt="預覽 '+(i+1)+'"><button type="button" data-prem="'+i+'" aria-label="移除這張">×</button></span>';}).join(''); }
 var pend={flight:null,coupon:null,ticket:null,tip:null};
 function bindPick(inputId,prevId,key){
@@ -1913,12 +1917,13 @@ function resetForm(k){
   if(k==='phrase'){ editPhr=null; $('#j-save').textContent='儲存句子'; }
   $$('#'+k+'-form input, #'+k+'-form textarea').forEach(function(i){ if(i.type==='file') i.value=''; else i.value=''; });
   if(k==='tip'){ pendTip=[]; renderPendTip(); }
+  if(k==='coupon'){ pendCp=[]; renderPendCp(); }
   else if(k==='flight'||k==='coupon'||k==='ticket'){ pend[k]=null; var p=$(k==='flight'?'#f-prev':k==='ticket'?'#k-prev':'#c-prev'); p.hidden=true; p.removeAttribute('src'); }
 }
 
 /* ---------- 事件 ---------- */
 document.addEventListener('click',function(e){
-  var t=e.target.closest('[data-day],[data-tab],[data-seg],[data-copy],[data-lb],[data-del],[data-used],[data-jump],[data-openform],[data-closeform],[data-fillflight],[data-toggle-edit],[data-reset],[data-inreset],[data-indone],[data-lbg],#lb-prev,#lb-next,[data-prem],[data-delx],[data-addopen],[data-addsave],[data-addcancel],[data-gowx],#lb-del,[data-fview],[data-fedit],[data-sclose],[data-delo],[data-undel],[data-tkopen],[data-tksave],[data-pdf],#pv-x,[data-tkwho],[data-route],[data-rsel],[data-redit],[data-rnew],#r-cancel,#r-save,[data-rdel],[data-who],[data-pkx],[data-say],[data-jedit],[data-jdel],#sheet,#h-edit,#h-save,#j-save,#pk-add,#lb-x,#lb,#f-save,#c-save,#k-save,#p-save,#s-save');
+  var t=e.target.closest('[data-day],[data-tab],[data-seg],[data-copy],[data-lb],[data-del],[data-used],[data-jump],[data-openform],[data-closeform],[data-fillflight],[data-toggle-edit],[data-reset],[data-inreset],[data-indone],[data-lbg],#lb-prev,#lb-next,[data-prem],[data-cprem],[data-delx],[data-addopen],[data-addsave],[data-addcancel],[data-gowx],#lb-del,[data-fview],[data-fedit],[data-sclose],[data-delo],[data-undel],[data-tkopen],[data-tksave],[data-pdf],#pv-x,[data-tkwho],[data-route],[data-rsel],[data-redit],[data-rnew],#r-cancel,#r-save,[data-rdel],[data-who],[data-pkx],[data-say],[data-jedit],[data-jdel],#sheet,#h-edit,#h-save,#j-save,#pk-add,#lb-x,#lb,#f-save,#c-save,#k-save,#p-save,#s-save');
   if(!t) return;
   if(t.hasAttribute('data-inreset')){ var irid=t.getAttribute('data-inreset'); delete S.notes['i_'+irid]; queueNotes(); swapInfo(irid); toast('已還原預設內容'); return; }
   if(t.hasAttribute('data-indone')){ var idn=t.getAttribute('data-indone'); editInfo=null; flushNotes(); swapInfo(idn); toast('注意事項已儲存'); return; }
@@ -1926,6 +1931,7 @@ document.addEventListener('click',function(e){
   if(t.hasAttribute('data-tab')){ showTab(t.getAttribute('data-tab')); return; }
   if(t.hasAttribute('data-seg')){ showSeg(t.getAttribute('data-seg')); return; }
   if(t.hasAttribute('data-copy')){ copyText(t.getAttribute('data-copy')); return; }
+  if(t.hasAttribute('data-cprem')){ pendCp.splice(parseInt(t.getAttribute('data-cprem'),10),1); renderPendCp(); return; }
   if(t.hasAttribute('data-prem')){ pendTip.splice(parseInt(t.getAttribute('data-prem'),10),1); renderPendTip(); return; }
   if(t.id==='lb-prev'){ lbStep(-1); return; }
   if(t.id==='lb-next'){ lbStep(1); return; }
@@ -1937,7 +1943,7 @@ document.addEventListener('click',function(e){
   }
   if(t.hasAttribute('data-gowx')){ showTab('plan'); selectDay(parseInt(t.getAttribute('data-gowx'),10)); return; }
   if(t.id==='lb-x'||t.id==='lb'){ if(e.target.id==='lb-img') return; $('#lb').hidden=true; lbCur=null; zReset(); return; }
-  if(t.hasAttribute('data-del')){ var id=t.getAttribute('data-del'); armDel(t,function(){ var was=S.items[id]; if(was&&was.kind==='tip'){ itemsOf('tphoto').filter(function(k){return k.ref===id;}).forEach(function(k){ delItem(k.id); }); } delItem(id).then(function(){ if(sheetId===id) closeSheet(); renderTools(); if(was&&was.ref){ renderDay(); } toast('已刪除'); }); }); return; }
+  if(t.hasAttribute('data-del')){ var id=t.getAttribute('data-del'); armDel(t,function(){ var was=S.items[id]; if(was&&(was.kind==='tip'||was.kind==='coupon')){ itemsOf('tphoto').filter(function(k){return k.ref===id;}).forEach(function(k){ delItem(k.id); }); } delItem(id).then(function(){ if(sheetId===id) closeSheet(); renderTools(); if(was&&was.ref){ renderDay(); } toast('已刪除'); }); }); return; }
   if(t.hasAttribute('data-used')){ var c=S.items[t.getAttribute('data-used')]; if(c){ c.used=!c.used; saveItem(c).then(renderTools); renderTools(); } return; }
   if(t.hasAttribute('data-jump')){
     var f=findItem(t.getAttribute('data-jump')); if(!f) return;
@@ -2106,8 +2112,10 @@ document.addEventListener('click',function(e){
   }
   if(t.id==='c-save'){
     var ti=val('#c-title'); if(!ti){ toast('先填折價券名稱'); return; }
-    var cp={id:uid8('coupon'),kind:'coupon',title:ti,shop:val('#c-shop'),exp:$('#c-exp').value,code:val('#c-code'),img:pend.coupon||'',used:false,ts:Date.now()};
-    saveItem(cp).then(function(){ resetForm('coupon'); closeForm('coupon'); renderCoupons(); toast('折價券已儲存'); });
+    var imgs=pendCp.slice(), now=Date.now();
+    var cp={id:uid8('coupon'),kind:'coupon',title:ti,shop:val('#c-shop'),exp:$('#c-exp').value,code:val('#c-code'),img:imgs.shift()||'',used:false,ts:now};
+    imgs.reduce(function(pr,d,ix){ return pr.then(function(){ return saveItem({id:uid8('tphoto'),kind:'tphoto',ref:cp.id,img:d,ts:now+1+ix}); }); },saveItem(cp))
+      .then(function(){ resetForm('coupon'); closeForm('coupon'); renderCoupons(); toast('折價券已儲存'); });
     return;
   }
   if(t.id==='s-save'){
@@ -2175,6 +2183,13 @@ document.addEventListener('change',function(e){
   var t=e.target; if(!t||!t.getAttribute) return;
   if(t.hasAttribute('data-pkc')){ var cid=t.getAttribute('data-pkc'), on=t.checked; editPack(function(p){ p[whoPk].forEach(function(x){ if(x.id===cid) x.done=on; }); }); return; }
   if(t.hasAttribute('data-pkt')){ var xid2=t.getAttribute('data-pkt'), nv2=t.value.trim(); if(!nv2){ renderPack(); return; } editPack(function(p){ p[whoPk].forEach(function(x){ if(x.id===xid2) x.t=nv2; }); }); return; }
+  if(t.hasAttribute('data-cpadd')){
+    var cref=t.getAttribute('data-cpadd'), cfs=Array.prototype.slice.call(t.files||[]); if(!cfs.length) return;
+    toast('圖片處理中…'); var base=Date.now();
+    cfs.reduce(function(pr,fl,ix){ return pr.then(function(){ return shrink(fl).then(function(d){ if(!d){ toast('有一張圖片無法處理，已略過'); return; } return saveItem({id:uid8('tphoto'),kind:'tphoto',ref:cref,img:d,ts:base+ix}); }); }); },Promise.resolve())
+      .then(function(){ renderCoupons(); toast('已加入圖片'); });
+    return;
+  }
   if(t.hasAttribute('data-jrup')){
     var jref=t.getAttribute('data-jrup'), fs=Array.prototype.slice.call(t.files||[]); if(!fs.length) return;
     toast('照片處理中…');
@@ -2244,7 +2259,10 @@ document.addEventListener('toggle',function(e){ var d=e.target; if(d&&d.classLis
 document.addEventListener('visibilitychange',function(){ if(document.hidden){ clearTimeout(nTimer); flushNotes(); } });
 window.addEventListener('pagehide',function(){ clearTimeout(nTimer); flushNotes(); });
 bindPick('#f-img','#f-prev','flight');
-bindPick('#c-img','#c-prev','coupon');
+$('#c-img').addEventListener('change',function(e){
+  var fs=Array.prototype.slice.call((e.target.files)||[]); if(!fs.length) return;
+  fs.reduce(function(pr,fl){ return pr.then(function(){ return shrink(fl).then(function(d){ if(d) pendCp.push(d); else toast('有一張圖片無法處理，已略過'); }); }); },Promise.resolve()).then(function(){ renderPendCp(); e.target.value=''; });
+});
 $('#k-img').addEventListener('change',function(e){
   var f=e.target.files&&e.target.files[0]; if(!f) return;
   readTicketFile(f).then(function(r){ if(!r) return; var pv=$('#k-prev'), pn=$('#k-pdfname');
