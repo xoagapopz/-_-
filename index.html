@@ -458,7 +458,6 @@ html,body{touch-action:manipulation}
 
       <div id="seg-sos">
         <div class="sec-h"><h2>緊急連絡電話</h2></div>
-        <p class="lead">點「複製」把號碼貼到電話。點「撥打」在部分瀏覽器不會反應。</p>
         <div class="sec-h"><h2>在日本</h2></div>
         <div class="list" id="sos-jp"></div>
         <div class="sec-h"><h2>台灣駐外</h2></div>
@@ -477,12 +476,11 @@ html,body{touch-action:manipulation}
 
       <div id="seg-tips" hidden>
         <div class="sec-h"><h2>旅遊攻略</h2><button class="btn shu sm" type="button" data-openform="tip">新增攻略</button></div>
-        <p class="lead">把每一項注意事項記下來。內容一行一條，會自動變成條列。</p>
         <div class="panel" id="tip-form" hidden>
           <div class="form">
             <label class="full">標題<input id="p-title" type="text" placeholder="例：搭電車、退稅、行李"></label>
-            <label class="full">注意事項（一行一條）<textarea id="p-text" rows="5" placeholder="例：&#10;ICOCA 可在便利商店儲值&#10;末班車約 24:00"></textarea></label>
-            <div class="full pick"><label style="flex:1 1 180px">圖片（選填，可一次選多張）<input id="p-img" type="file" accept="image/*" multiple></label><div class="pthumbs" id="p-prevs"></div></div>
+            <label class="full">注意事項<textarea id="p-text" rows="5" placeholder="例：&#10;ICOCA 可在便利商店儲值&#10;末班車約 24:00"></textarea></label>
+            <div class="full pick"><label style="flex:1 1 180px">圖片<input id="p-img" type="file" accept="image/*" multiple></label><div class="pthumbs" id="p-prevs"></div></div>
           </div>
           <div class="fbtns"><button class="btn shu sm" type="button" id="p-save">儲存攻略</button><button class="btn ghost sm" type="button" data-closeform="tip">取消</button></div>
         </div>
@@ -510,7 +508,7 @@ html,body{touch-action:manipulation}
 
       <div id="seg-jp" hidden>
         <div class="sec-h"><h2>常用日文會話</h2><button class="btn shu sm" type="button" data-openform="phrase">新增句子</button></div>
-        <p class="lead">點「念給我聽」用手機發音，或直接把畫面給店員看。每一句都能編輯。</p>
+        <p class="lead">點「念給我聽」用手機發音，或直接把畫面給店員看。</p>
         <div class="panel" id="phrase-form" hidden>
           <div class="form">
             <label class="full">日文<input id="j-jp" type="text" placeholder="例：これをください"></label>
@@ -587,7 +585,7 @@ html,body{touch-action:manipulation}
 
     <section id="tab-wx" hidden aria-label="天氣">
       <div class="sec-h"><h2>天氣與穿著</h2><small>11 月初歷年氣候</small></div>
-      <p class="lead">下面是歷年同期的氣溫範圍，不是預報。出發前一週點「開啟天氣 App」用 iPhone 內建天氣看最新預報。</p>
+      <p class="lead">以下為歷年同時期的氣溫範圍，不是即時氣象。</p>
       <div class="list" id="wxlist" style="margin-top:10px"></div>
     </section>
 
@@ -1907,8 +1905,8 @@ function tipEditHtml(p){
   d.adds.forEach(function(a,i){ th.push('<span class="pt"><img src="'+a+'" alt="新圖片"><button type="button" data-tdeladd="'+i+'" aria-label="移除這張">×</button></span>'); });
   return '<div class="cp"><h3>編輯攻略</h3><div class="form">'+
     '<label class="full">標題<input id="te-title" type="text" value="'+esc(d.title)+'"></label>'+
-    '<label class="full">注意事項（一行一條）<textarea id="te-text" rows="6">'+esc(d.text)+'</textarea></label>'+
-    '<div class="full pick"><label style="flex:1 1 180px">新增圖片（可一次選多張）<input type="file" accept="image/*" multiple data-tadd="1"></label><div class="pthumbs">'+th.join('')+'</div></div>'+
+    '<label class="full">注意事項<textarea id="te-text" rows="6">'+esc(d.text)+'</textarea></label>'+
+    '<div class="full pick"><label style="flex:1 1 180px">新增圖片<input type="file" accept="image/*" multiple data-tadd="1"></label><div class="pthumbs">'+th.join('')+'</div></div>'+
     '</div><div class="fbtns"><button class="btn shu sm" type="button" data-tsave="'+p.id+'">儲存</button><button class="btn ghost sm" type="button" data-tcancel="1">取消</button></div></div>';
 }
 document.addEventListener('click',function(e){
