@@ -1538,10 +1538,11 @@ function renderTips(){
   var list=itemsOf('tip').sort(function(a,b){return (a.ts||0)-(b.ts||0);});
   $('#tips').innerHTML=list.length?list.map(function(p){
     var lines=String(p.text||'').split(/\n+/).map(function(s){return s.replace(/^\s*[-•・*]\s*/,'').trim();}).filter(Boolean);
+    if(tipEd&&tipEd.id===p.id) return tipEditHtml(p);
     return '<div class="cp"><h3>'+esc(p.title)+'</h3>'+
       (lines.length?'<ul style="margin:8px 0 0;padding-left:20px;font-size:14px;line-height:1.7">'+lines.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')+'</ul>':'')+
       tipGrid(p)+
-      '<div class="acts"><button type="button" class="mini danger" data-del="'+p.id+'">'+ic('trash')+'<span>刪除</span></button></div></div>';
+      '<div class="acts"><button type="button" class="mini" data-tedit="'+p.id+'"><span>編輯</span></button><button type="button" class="mini danger" data-del="'+p.id+'">'+ic('trash')+'<span>刪除</span></button></div></div>';
   }).join(''):'<div class="empty"><b>還沒有攻略</b>記下搭車、退稅、用餐禮儀等注意事項，也能附上截圖。</div>';
 }
 function renderCodes(){
@@ -1897,6 +1898,48 @@ document.addEventListener('click',function(e){
     saveItem(ct).then(function(){ resetForm('contact'); closeForm('contact'); renderSos(); toast('聯絡人已儲存'); });
     return;
   }
+});
+
+var tipEd=null;
+function tipEditHtml(p){
+  var d=tipEd, th=[];
+  tipImgs(p).forEach(function(x){ var key=(x.id===p.id)?'_main':x.id; if(!d.dels[key]) th.push('<span class="pt"><img src="'+x.img+'" alt="攻略圖片"><button type="button" data-tdel="'+key+'" aria-label="移除這張">×</button></span>'); });
+  d.adds.forEach(function(a,i){ th.push('<span class="pt"><img src="'+a+'" alt="新圖片"><button type="button" data-tdeladd="'+i+'" aria-label="移除這張">×</button></span>'); });
+  return '<div class="cp"><h3>編輯攻略</h3><div class="form">'+
+    '<label class="full">標題<input id="te-title" type="text" value="'+esc(d.title)+'"></label>'+
+    '<label class="full">注意事項（一行一條）<textarea id="te-text" rows="6">'+esc(d.text)+'</textarea></label>'+
+    '<div class="full pick"><label style="flex:1 1 180px">新增圖片（可一次選多張）<input type="file" accept="image/*" multiple data-tadd="1"></label><div class="pthumbs">'+th.join('')+'</div></div>'+
+    '</div><div class="fbtns"><button class="btn shu sm" type="button" data-tsave="'+p.id+'">儲存</button><button class="btn ghost sm" type="button" data-tcancel="1">取消</button></div></div>';
+}
+document.addEventListener('click',function(e){
+  var t=e.target.closest&&e.target.closest('[data-tedit],[data-tcancel],[data-tsave],[data-tdel],[data-tdeladd]'); if(!t) return;
+  if(t.hasAttribute('data-tedit')){ var p=S.items[t.getAttribute('data-tedit')]; if(!p) return; tipEd={id:p.id,title:p.title||'',text:p.text||'',adds:[],dels:{}}; renderTips(); var ta=$('#te-text'); if(ta) ta.scrollIntoView({block:'center'}); return; }
+  if(!tipEd) return;
+  if(t.hasAttribute('data-tcancel')){ tipEd=null; renderTips(); return; }
+  if(t.hasAttribute('data-tdel')){ tipEd.dels[t.getAttribute('data-tdel')]=1; renderTips(); return; }
+  if(t.hasAttribute('data-tdeladd')){ tipEd.adds.splice(parseInt(t.getAttribute('data-tdeladd'),10),1); renderTips(); return; }
+  if(t.hasAttribute('data-tsave')){
+    var id=t.getAttribute('data-tsave'), p0=S.items[id], d=tipEd; if(!p0) return;
+    if(!d.title.trim()){ toast('先填標題'); return; }
+    var np={}; Object.keys(p0).forEach(function(k){ np[k]=p0[k]; }); np.title=d.title.trim(); np.text=d.text.trim();
+    if(d.dels._main) np.img='';
+    var adds=d.adds.slice(), dels=Object.keys(d.dels).filter(function(k){return k!=='_main';});
+    saveItem(np).then(function(){
+      return dels.reduce(function(pr,k){ return pr.then(function(){ return delItem(k); }); },Promise.resolve());
+    }).then(function(){
+      return adds.reduce(function(pr,a,ix){ return pr.then(function(){ return saveItem({id:uid8('tphoto'),kind:'tphoto',ref:id,img:a,ts:Date.now()+ix}); }); },Promise.resolve());
+    }).then(function(){ tipEd=null; renderTips(); toast('攻略已更新'); });
+    return;
+  }
+});
+document.addEventListener('input',function(e){
+  var t=e.target; if(!tipEd||!t||!t.id) return;
+  if(t.id==='te-title') tipEd.title=t.value; else if(t.id==='te-text') tipEd.text=t.value;
+});
+document.addEventListener('change',function(e){
+  var t=e.target; if(!tipEd||!t||!t.hasAttribute||!t.hasAttribute('data-tadd')) return;
+  var fs=Array.prototype.slice.call(t.files||[]); if(!fs.length) return;
+  fs.reduce(function(pr,fl){ return pr.then(function(){ return shrink(fl).then(function(d){ if(d) tipEd.adds.push(d); else toast('有一張圖片無法處理，已略過'); }); }); },Promise.resolve()).then(function(){ renderTips(); });
 });
 document.addEventListener('input',function(e){
   var t=e.target;
