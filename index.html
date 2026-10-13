@@ -300,8 +300,11 @@ button:active,.btn:active,.nv:active,.mini:active{transform:scale(.95)}
 .infobox .ib{flex:1;min-width:0;white-space:pre-wrap;overflow-wrap:anywhere}
 .infobox .ibh{display:block;margin-top:2px;font-size:11px;color:var(--ink2);white-space:normal}
 .infobox .ibe{font-style:normal;color:var(--ink2)}
-.infobox.pressing{transform:scale(.98);box-shadow:0 0 0 2px var(--ai)}
-.infobox.editing{cursor:auto;-webkit-user-select:auto;user-select:auto;box-shadow:0 0 0 2px var(--ai)}
+.infobox{background:var(--shu-t);background:color-mix(in srgb,var(--shu) 15%,var(--card));border:1px solid var(--shu-t);border-color:color-mix(in srgb,var(--shu) 28%,transparent)}
+.infobox .ic,.infobox b{color:var(--shu)}
+.infobox .ibh,.infobox .ibe{color:color-mix(in srgb,var(--shu) 55%,var(--ink2))}
+.infobox.pressing{transform:scale(.98);box-shadow:0 0 0 2px var(--shu)}
+.infobox.editing{cursor:auto;-webkit-user-select:auto;user-select:auto;box-shadow:0 0 0 2px var(--shu)}
 .infobox.editing .ib{display:flex;flex-direction:column;gap:6px;white-space:normal}
 .infobox.editing .infota{margin-top:2px}
 .jr{display:flex;flex-direction:column;gap:8px}
@@ -695,7 +698,7 @@ html,body{touch-action:manipulation}
       <div class="who2" id="who2" role="tablist"></div>
       <div id="pack"></div>
     </section>
-    <p class="appver">版本 10/13-e（含環球影城攻略）</p>
+    <p class="appver">版本 10/13-f</p>
   </main>
 </div>
 
