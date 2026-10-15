@@ -698,7 +698,7 @@ html,body{touch-action:manipulation}
       <div class="who2" id="who2" role="tablist"></div>
       <div id="pack"></div>
     </section>
-    <p class="appver">版本 10/13-f</p>
+    <p class="appver">版本 10/15-a</p>
   </main>
 </div>
 
@@ -1654,12 +1654,13 @@ function renderCoupons(){
   });
   var today=new Date(); var ts=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
   $('#coupons').innerHTML=list.length?list.map(function(c){
+    if(cpEd&&cpEd.id===c.id) return cpEditHtml(c);
     var expired=c.exp&&c.exp<ts;
     return '<div class="cp'+(c.used?' used':'')+'"><h3>'+esc(c.title)+'</h3><div class="meta">'+(c.shop?'<span>'+esc(c.shop)+'</span>':'')+(c.exp?'<span>到期 '+esc(fmtDate(c.exp))+(expired?'（已過期）':'')+'</span>':'')+(c.used?'<span>已使用</span>':'')+'</div>'+
       (c.code?'<div class="code">'+esc(c.code)+'</div>':'')+
       tipGrid(c)+
       '<label class="jr-add cpadd">'+ic('plus')+'新增圖片<input type="file" accept="image/*" multiple id="cpa-'+c.id+'" data-cpadd="'+c.id+'"></label>'+
-      '<div class="acts">'+(c.code?'<button type="button" class="mini" data-copy="'+esc(c.code)+'">'+ic('copy')+'複製折扣碼</button>':'')+'<button type="button" class="mini'+(c.used?' on':'')+'" data-used="'+c.id+'">'+ic('check')+(c.used?'已使用':'標示已使用')+'</button><button type="button" class="mini danger" data-del="'+c.id+'">'+ic('trash')+'<span>刪除</span></button></div></div>';
+      '<div class="acts">'+(c.code?'<button type="button" class="mini" data-copy="'+esc(c.code)+'">'+ic('copy')+'複製折扣碼</button>':'')+'<button type="button" class="mini'+(c.used?' on':'')+'" data-used="'+c.id+'">'+ic('check')+(c.used?'已使用':'標示已使用')+'</button><button type="button" class="mini" data-cpedit="'+c.id+'"><span>編輯</span></button><button type="button" class="mini danger" data-del="'+c.id+'">'+ic('trash')+'<span>刪除</span></button></div></div>';
   }).join(''):'<div class="empty"><b>還沒有折價券</b>把藥妝、電器、餐廳的折價 QR Code 截圖放進來，結帳時直接點開出示。</div>';
 }
 var whoTk='koala';
@@ -2319,6 +2320,52 @@ document.addEventListener('click',function(e){
   }
 });
 
+var cpEd=null;
+function cpEditHtml(c){
+  var d=cpEd, th=[];
+  tipImgs(c).forEach(function(x){ var key=(x.id===c.id)?'_main':x.id; if(!d.dels[key]) th.push('<span class="pt"><img src="'+x.img+'" alt="折價券圖片"><button type="button" data-cpdel="'+key+'" aria-label="移除這張">×</button></span>'); });
+  d.adds.forEach(function(a,i){ th.push('<span class="pt"><img src="'+a+'" alt="新圖片"><button type="button" data-cpdeladd="'+i+'" aria-label="移除這張">×</button></span>'); });
+  return '<div class="cp"><h3>編輯折價券</h3><div class="form">'+
+    '<label class="full">折價券名稱<input id="ce-title" type="text" value="'+esc(d.title)+'"></label>'+
+    '<label>適用店家<input id="ce-shop" type="text" value="'+esc(d.shop)+'"></label>'+
+    '<label>到期日<input id="ce-exp" type="date" value="'+esc(d.exp)+'"></label>'+
+    '<label class="full">折扣碼或說明<input id="ce-code" type="text" value="'+esc(d.code)+'"></label>'+
+    '<div class="full pick"><label style="flex:1 1 180px">新增圖片<input type="file" accept="image/*" multiple data-cpaddn="1"></label><div class="pthumbs">'+th.join('')+'</div></div>'+
+    '</div><div class="fbtns"><button class="btn shu sm" type="button" data-cpsave="'+c.id+'">儲存</button><button class="btn ghost sm" type="button" data-cpcancel="1">取消</button></div></div>';
+}
+document.addEventListener('click',function(e){
+  var t=e.target.closest&&e.target.closest('[data-cpedit],[data-cpcancel],[data-cpsave],[data-cpdel],[data-cpdeladd]'); if(!t) return;
+  if(t.hasAttribute('data-cpedit')){ var c=S.items[t.getAttribute('data-cpedit')]; if(!c) return; cpEd={id:c.id,title:c.title||'',shop:c.shop||'',exp:c.exp||'',code:c.code||'',adds:[],dels:{}}; renderCoupons(); var el=$('#ce-title'); if(el) el.scrollIntoView({block:'center'}); return; }
+  if(!cpEd) return;
+  if(t.hasAttribute('data-cpcancel')){ cpEd=null; renderCoupons(); return; }
+  if(t.hasAttribute('data-cpdel')){ cpEd.dels[t.getAttribute('data-cpdel')]=1; renderCoupons(); return; }
+  if(t.hasAttribute('data-cpdeladd')){ cpEd.adds.splice(parseInt(t.getAttribute('data-cpdeladd'),10),1); renderCoupons(); return; }
+  if(t.hasAttribute('data-cpsave')){
+    var id=t.getAttribute('data-cpsave'), c0=S.items[id], d=cpEd; if(!c0) return;
+    if(!d.title.trim()){ toast('先填折價券名稱'); return; }
+    var nc={}; Object.keys(c0).forEach(function(k){ nc[k]=c0[k]; });
+    nc.title=d.title.trim(); nc.shop=d.shop.trim(); nc.exp=d.exp; nc.code=d.code.trim();
+    if(d.dels._main) nc.img='';
+    var adds=d.adds.slice(), dels=Object.keys(d.dels).filter(function(k){return k!=='_main';});
+    saveItem(nc).then(function(){
+      return dels.reduce(function(pr,k){ return pr.then(function(){ return delItem(k); }); },Promise.resolve());
+    }).then(function(){
+      return adds.reduce(function(pr,a,ix){ return pr.then(function(){ return saveItem({id:uid8('tphoto'),kind:'tphoto',ref:id,img:a,ts:Date.now()+ix}); }); },Promise.resolve());
+    }).then(function(){ cpEd=null; renderCoupons(); toast('折價券已更新'); });
+    return;
+  }
+});
+document.addEventListener('input',function(e){
+  var t=e.target; if(!cpEd||!t||!t.id) return;
+  if(t.id==='ce-title') cpEd.title=t.value; else if(t.id==='ce-shop') cpEd.shop=t.value; else if(t.id==='ce-exp') cpEd.exp=t.value; else if(t.id==='ce-code') cpEd.code=t.value;
+});
+document.addEventListener('change',function(e){
+  var t=e.target; if(!t||!t.hasAttribute) return;
+  if(t.id==='ce-exp'&&cpEd){ cpEd.exp=t.value; return; }
+  if(!cpEd||!t.hasAttribute('data-cpaddn')) return;
+  var fs=Array.prototype.slice.call(t.files||[]); if(!fs.length) return;
+  fs.reduce(function(pr,fl){ return pr.then(function(){ return shrink(fl).then(function(d){ if(d) cpEd.adds.push(d); else toast('有一張圖片無法處理，已略過'); }); }); },Promise.resolve()).then(function(){ renderCoupons(); });
+});
 var tipEd=null;
 function tipEditHtml(p){
   var d=tipEd, th=[];
