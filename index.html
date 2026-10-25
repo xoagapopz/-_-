@@ -646,7 +646,7 @@ button,input,select,textarea{font-family:inherit}
 .btn.shu{background:#F2A497;color:#3E3A39}
 .btn.ghost,.nv.alt{background:transparent;color:#3E3A39;border:2px solid #3E3A39}
 .nv{background:var(--k);color:#3E3A39;font-weight:400}
-.mini{background:#FFFCF6}
+.mini{background:#FFFCF6;white-space:nowrap;flex:none}
 .mini.danger.armed{background:#F2A497;border-color:#3E3A39}
 .mini.on{background:#B9DAA5;border-color:#3E3A39}
 .seg button{background:#FFFCF6;font-weight:400}
@@ -714,7 +714,8 @@ button,input,select,textarea{font-family:inherit}
 .stay2 .nights{background:#F6D27A;color:#3E3A39;border:2px solid #3E3A39}
 .tk .tl{border-right:3px solid #3E3A39}
 .sheet,#sheet .in{border:3px solid #3E3A39;background:#FFFCF6}
-.sec-h h2,.pk-head b,.cp h3,.htl h3{font-weight:400}
+.sec-h h2,.pk-head b,.htl h3{font-weight:400}
+.cp h3{font-weight:700;font-size:21px;line-height:1.35;margin:0 0 2px;padding-bottom:6px;border-bottom:3px solid #F6D27A}
 .meta .man,.jr-add,.nv.alt,.jr-h{color:#3E3A39}
 .jr-add{border:2px dashed #3E3A39}
 .infobox .ibh,.infobox .ibe{color:#6E6663}
@@ -986,7 +987,7 @@ button,input,select,textarea{font-family:inherit}
       <div class="who2" id="who2" role="tablist"></div>
       <div id="pack"></div>
     </section>
-    <p class="appver">版本 10/25-a</p>
+    <p class="appver">版本 10/25-c</p>
   </main>
 </div>
 
@@ -1182,10 +1183,32 @@ var ROUTES={
   {n:'步行',min:20,fare:'免費',walk:20,tf:0,s:[W('從通天閣沿天王寺公園旁往東走，約 20 分')]}],
  'd6-1':[
   {n:'御堂筋線 心斎橋 → 梅田',min:20,fare:'¥240',walk:12,tf:0,note:'Gate J. 的位置請先在地圖確認',s:[W('步行到心斎橋站，約 7 分'),M('御堂筋線 往 新大阪，坐 3 站到 梅田'),W('依地圖步行到 Gate J.')]}],
- 'd6-21':[{n:'步行',min:7,fare:'免費',walk:7,tf:0,s:[W('步行到綱敷天神社御旅社')]}],};
+ 'd6-21':[{n:'步行',min:7,fare:'免費',walk:7,tf:0,s:[W('步行到綱敷天神社御旅社')]}], 'd1-22':[
+  {n:'步行回飯店',min:25,fare:'免費',walk:25,tf:0,s:[W('從 Bic Camera 難波店沿御堂筋往北走，約 25 分到飯店')]},
+  {n:'御堂筋線 なんば → 心斎橋',min:15,fare:'¥190',walk:10,tf:0,note:'行李多或天氣不好時較輕鬆',s:[W('步行到御堂筋線 なんば站，約 3 分'),M('御堂筋線 往 新大阪，坐 1 站到 心斎橋（¥190）'),W('出站步行約 7 分到飯店')]}],
+ 'd2-4':[
+  {n:'JR 阪和線＋御堂筋線',min:40,fare:'約 ¥600',walk:12,tf:1,s:[W('步行到 JR 鳳站，約 5 分'),J('JR 阪和線 往 天王寺，坐到 天王寺'),M('轉乘御堂筋線 往 新大阪，坐到 なんば'),W('步行約 7 分到日本橋 Ota Road')]},
+  {n:'JR 阪和線 到 新今宮，步行到日本橋',min:45,fare:'約 ¥500',walk:25,tf:0,note:'新今宮站到 Ota Road 步行約 20 分，不想走路可選上一條',s:[W('步行到 JR 鳳站，約 5 分'),J('JR 阪和線 往 天王寺，坐到 新今宮'),W('步行約 20 分到日本橋 Ota Road')]}],
+ 'd2-23':[
+  {n:'步行',min:15,fare:'免費',walk:15,tf:0,s:[W('從日本橋沿堺筋往南走到難波 CITY，約 15 分')]},
+  {n:'千日前線 日本橋 → なんば',min:10,fare:'¥190',walk:8,tf:0,s:[W('步行到日本橋站，約 3 分'),M('千日前線 往 野田阪神，坐 1 站到 なんば（¥190）'),W('步行約 5 分到難波 CITY')]}],
+ 'd2-27':[
+  {n:'步行回飯店',min:15,fare:'免費',walk:15,tf:0,s:[W('從道頓堀沿心斎橋筋往北走，約 15 分到飯店')]},
+  {n:'御堂筋線 なんば → 心斎橋',min:12,fare:'¥190',walk:8,tf:0,s:[W('步行到御堂筋線 なんば站，約 4 分'),M('御堂筋線 往 新大阪，坐 1 站到 心斎橋（¥190）'),W('出站步行約 4 分到飯店')]}],
+ 'd3-3':'USJBACK',
+ 'd5-22':[
+  {n:'御堂筋線 天王寺 → 心斎橋',min:33,fare:'¥240',walk:10,tf:0,s:[W('步行到御堂筋線 天王寺站，約 3 分'),M('御堂筋線 往 千里中央，坐到 心斎橋（約 15 分）'),W('出站步行約 7 分')]},
+  {n:'JR 環狀線＋御堂筋線',min:40,fare:'約 ¥340',walk:12,tf:1,note:'想先到大阪市中心其他站再轉乘時可選',s:[W('步行到 JR 天王寺站，約 3 分'),J('JR 大阪環狀線 往 大阪，坐到 鶴橋 或 大阪方向'),M('轉乘地下鐵往 心斎橋'),W('步行約 7 分')]}],
+ 'd6-3':[
+  {n:'御堂筋線＋南海空港急行',min:75,fare:'¥1,160',walk:14,tf:1,s:[W('步行到阪急梅田站／地下鐵梅田站，約 5 分'),M('御堂筋線 往 なんば，坐到終點 なんば（約 10 分）'),W('轉乘南海「なんば」站，約 5 分'),R('南海本線「空港急行」往 関西空港，約 45 分（¥970）')]},
+  {n:'JR 関空快速 大阪站直達',min:75,fare:'約 ¥1,200',walk:10,tf:0,note:'大阪站直達，不用轉乘；有行李時最輕鬆，要看發車時間',s:[W('步行到 JR 大阪站，約 10 分'),J('JR「関空・紀州路快速」往 関西空港，直達約 65 分')]}],
+};
 ROUTES.USJ=[
   {n:'長堀鶴見綠地線＋JR 環狀線＋ゆめ咲線',min:35,fare:'¥390',walk:12,tf:2,s:[W('步行到心斎橋站，約 7 分'),M('長堀鶴見緑地線 往 大正，坐 3 站到終點 大正'),W('轉乘 JR 大正站，約 3 分'),J('JR 大阪環狀線（往 西九条・大阪方向）坐 2 站到 西九条'),J('轉 JR ゆめ咲線 往 桜島，坐 2 站到 ユニバーサルシティ'),W('步行約 5 分到園區入口')]},
   {n:'御堂筋線＋JR（大阪站直通列車）',min:35,fare:'¥440',walk:20,tf:1,note:'沒有直通班次時，在 西九条 轉 ゆめ咲線，會多一次轉乘',s:[W('步行到心斎橋站，約 7 分'),M('御堂筋線 往 新大阪，坐 3 站到 梅田'),W('步行到 JR 大阪站，約 8 分'),J('搭往「ユニバーサルシティ」的直通列車，約 12 分'),W('步行約 5 分到園區入口')]}];
+ROUTES.USJBACK=[
+  {n:'JR ゆめ咲線＋大阪環狀線＋長堀鶴見綠地線',min:35,fare:'¥390',walk:12,tf:2,s:[W('步行約 5 分到 JR ユニバーサルシティ站'),J('JR ゆめ咲線 往 西九条，到 西九条'),J('轉 JR 大阪環狀線 往 大正，坐 2 站到 大正'),M('轉長堀鶴見緑地線 往 門真南，坐 3 站到 心斎橋'),W('步行約 7 分到飯店')]},
+  {n:'JR 直通列車＋御堂筋線',min:35,fare:'¥440',walk:20,tf:1,note:'沒有直通班次時，在 西九条 轉車，會多一次轉乘',s:[W('步行約 5 分到 JR ユニバーサルシティ站'),J('搭往「大阪」的直通列車，約 12 分'),W('步行到御堂筋線 梅田站，約 8 分'),M('御堂筋線 往 なんば，坐 3 站到 心斎橋'),W('步行約 7 分到飯店')]}];
 var MODE={walk:['步行','walk'],metro:['地下鐵','bus'],jr:['JR','bus'],rail:['私鐵','bus'],ship:['船','ship']};
 function routeOpts(id){
   var r=ROUTES[id]; if(typeof r==='string') r=ROUTES[r]; if(!r) return null;
