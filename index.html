@@ -666,13 +666,13 @@ button,input,select,textarea{font-family:inherit}
 .dtab[aria-selected="true"]{background:var(--dc);border-color:#3E3A39;color:#3E3A39}
 .dtab[aria-selected="true"] span{color:#3E3A39;opacity:1}
 /* 每日標題與天氣 */
-.hero{background:#A8D3E6;color:#3E3A39}
+.hero{background:var(--dc,#A8D3E6);color:#3E3A39}
 .dnum{background:#FFFCF6;border:2px solid #3E3A39;font-weight:400}
 .wx{background:#FFFCF6;border:2px solid #3E3A39;border-radius:20px}
 .wx .ic{color:#3E3A39}
 .wx-live{background:#F6D27A;border:2px solid #3E3A39}
 .hero h2{font-weight:400}
-.hero-act .btn{background:#F6D27A}
+.hero-act .btn{background:#FFFCF6}
 .hero .btn.ghost{background:transparent}
 /* 時間軸 */
 .line::before{border-left:3px dashed #3E3A39;left:23px}
@@ -992,7 +992,7 @@ button,input,select,textarea{font-family:inherit}
       <div class="who2" id="who2" role="tablist"></div>
       <div id="pack"></div>
     </section>
-    <p class="appver">版本 10/25-d</p>
+    <p class="appver">版本 10/25-f</p>
   </main>
 </div>
 
@@ -1030,7 +1030,7 @@ button,input,select,textarea{font-family:inherit}
   </div>
   <p class="lead" id="au-msg" style="margin:0"></p>
 </div></div>
-<div id="lb" hidden><span id="lb-q" hidden></span><img id="lb-img" alt="放大圖片" draggable="false"><span id="lb-hint">兩指縮放・點兩下放大</span><div class="lbnav" id="lb-nav" hidden><button type="button" id="lb-prev" aria-label="上一張">‹</button><span id="lb-cnt"></span><button type="button" id="lb-next" aria-label="下一張">›</button></div><span id="lb-fh" hidden>向上滑動即可關閉全螢幕</span><div class="fbtns"><button class="btn" type="button" id="lb-x">關閉</button><button class="btn" type="button" id="lb-full" aria-label="全螢幕"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>全螢幕</button><button class="btn ghost" style="color:#fff" type="button" id="lb-del" hidden>刪除這張照片</button></div></div>
+<div id="lb" hidden><span id="lb-q" hidden></span><img id="lb-img" alt="放大圖片" draggable="false"><span id="lb-hint">兩指縮放・點兩下放大</span><div class="lbnav" id="lb-nav" hidden><button type="button" id="lb-prev" aria-label="上一張">‹</button><span id="lb-cnt"></span><button type="button" id="lb-next" aria-label="下一張">›</button></div><span id="lb-fh" hidden>向上滑動即可關閉</span><div class="fbtns"><button class="btn" type="button" id="lb-x">關閉</button><button class="btn" type="button" id="lb-full" aria-label="全螢幕"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>全螢幕</button><button class="btn ghost" style="color:#fff" type="button" id="lb-del" hidden>刪除這張照片</button></div></div>
 
 <script>
 (function(){
@@ -1352,7 +1352,7 @@ var DAYS = [
   g:[['攻略','整理今天買的東西。明天 07:00 出門，行李先排好。']]}
  ]},
 
-{id:'d6',n:6,date:'11/07',dow:'六',theme:'梅田，歸途',dc:'#F9E3A8',dct:'#3E3A39',
+{id:'d6',n:6,date:'11/07',dow:'六',theme:'梅田，歸途',dc:'#D5C6EE',dct:'#3E3A39',
  wx:{place:'梅田・關西機場',lo:13,hi:21,tip:'機場風大，外套放手提。回台灣前把液體放託運行李。',q:'大阪 梅田 天氣'},
  items:[
  {id:'d6-1',info:'地點：飯店（房號請自行填寫）\n注意：退房前確認護照、充電器、行李寄放。',t:'07:00',manual:1,name:'大阪心齋橋橋梁酒店',kind:'stay',stay:60,map:HOTEL,hop:{m:'bus',min:24},
@@ -1732,7 +1732,7 @@ function heroHtml(d){
   var w=d.wx, f=S.forecast[d.id];
   var live=f?('<div class="wx-live"><b>預報 '+esc(f.lo)+'–'+esc(f.hi)+'°C</b>　'+esc(f.desc||'')+(f.pop!=null?'　降雨 '+esc(f.pop)+'%':'')+(f.updated?'　<small>更新 '+esc(f.updated)+'</small>':'')+'</div>'):'';
   var stops=dayItems(d).length;
-  return '<section class="hero">'+
+  return '<section class="hero" style="--dc:'+d.dc+'">'+
     '<div class="hero-top"><span class="dnum">第 '+d.n+' 天</span><span class="ddate">'+d.date+' 星期'+d.dow+'　·　'+esc(w.place)+'</span></div>'+
     '<h2>'+esc(d.theme)+'</h2>'+
     '<div class="wx">'+ic('sun')+'<div class="wx-main"><div class="wx-t">'+esc(w.place)+'　11 月初的典型氣候 <b>約 '+w.lo+'–'+w.hi+'°C</b></div><div class="wx-s">'+esc(w.tip)+'</div>'+live+'</div>'+
@@ -3073,7 +3073,7 @@ document.addEventListener('keydown',function(e){
 document.addEventListener('toggle',function(e){ var d=e.target; if(d&&d.classList&&d.classList.contains('infod')&&d.open){ var ta=$('textarea',d); if(ta) autosize(ta); } },true);
 (function(){ var sx=null,sy=null,lb=$('#lb');
   lb.addEventListener('touchstart',function(e){ if(e.touches.length>1){ sx=null; return; } var t=e.touches[0]; sx=t.clientX; sy=t.clientY; },{passive:true});
-  lb.addEventListener('touchend',function(e){ if(sx==null) return; if(Z.z>1.01||Z.multi||e.touches.length){ sx=null; return; } var t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy; sx=null; if(lb.classList.contains('full')&&dy<-70&&Math.abs(dy)>Math.abs(dx)*1.5){ exitFull(); return; } if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.5) lbStep(dx<0?1:-1); },{passive:true});
+  lb.addEventListener('touchend',function(e){ if(sx==null) return; if(Z.z>1.01||Z.multi||e.touches.length){ sx=null; return; } var t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy; sx=null; if(lb.classList.contains('full')&&dy<-70&&Math.abs(dy)>Math.abs(dx)*1.5){ exitFull(); lb.hidden=true; lbCur=null; zReset(); return; } if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.5) lbStep(dx<0?1:-1); },{passive:true});
   document.addEventListener('keydown',function(e){ if(lb.hidden) return; if(e.key==='ArrowLeft') lbStep(-1); else if(e.key==='ArrowRight') lbStep(1); else if(e.key==='Escape') lb.hidden=true; });
 })();
 document.addEventListener('visibilitychange',function(){ if(document.hidden){ clearTimeout(nTimer); flushNotes(); } });
