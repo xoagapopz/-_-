@@ -672,7 +672,7 @@ button,input,select,textarea{font-family:inherit}
 .wx .ic{color:#3E3A39}
 .wx-live{background:#F6D27A;border:2px solid #3E3A39}
 .hero h2{font-weight:400}
-.hero-act .btn{background:#FFFCF6}
+.hero-act .btn{background:#F6D27A}
 .hero .btn.ghost{background:transparent}
 /* 時間軸 */
 .line::before{border-left:3px dashed #3E3A39;left:23px}
@@ -737,6 +737,43 @@ button,input,select,textarea{font-family:inherit}
 @keyframes fly{from{transform:translate(0,0) rotate(-2deg)}to{transform:translate(10px,-7px) rotate(3deg)}}
 @keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
 .scene .blink{transform-box:fill-box;transform-origin:center}
+/* 首頁插圖：依實際時間切換 白天／日落／夜晚 */
+.scene{background:#A8D3E6;transition:background .8s}
+.scene.notrans *{transition:none!important}
+.scene .sk1,.scene .sk2,.scene .sk3{transition:stop-color 1.2s}
+.scene .sk1{stop-color:#A8D3E6}.scene .sk2{stop-color:#B4DAEA}.scene .sk3{stop-color:#C8E5F0}
+.scene[data-tod="dusk"] .sk1{stop-color:#9C9CC8}.scene[data-tod="dusk"] .sk2{stop-color:#F2A497}.scene[data-tod="dusk"] .sk3{stop-color:#F7C48A}
+.scene[data-tod="night"] .sk1{stop-color:#2F3A68}.scene[data-tod="night"] .sk2{stop-color:#46518A}.scene[data-tod="night"] .sk3{stop-color:#5D6699}
+.scene .sunpos{transition:transform 1.4s cubic-bezier(.4,0,.2,1),opacity 1s}
+.scene[data-tod="dusk"] .sunpos{transform:translate(2px,60px)}
+.scene[data-tod="night"] .sunpos{transform:translate(2px,130px);opacity:0}
+.scene .sun circle{transition:fill 1s}
+.scene[data-tod="dusk"] .sun circle{fill:#F59A6A}
+.scene .cloud path{transition:fill 1s}
+.scene[data-tod="dusk"] .cloud path{fill:#FCE6E1}
+.scene[data-tod="night"] .cloud path{fill:#A9B0CF}
+.scene .ground{transition:fill 1s}
+.scene[data-tod="dusk"] .ground{fill:#C8CF96}
+.scene[data-tod="night"] .ground{fill:#6E8E7A}
+.scene .veil{fill:#1B2347;opacity:0;pointer-events:none;transition:opacity 1.2s,fill 1.2s}
+.scene[data-tod="dusk"] .veil{fill:#F2A497;opacity:.14}
+.scene[data-tod="night"] .veil{opacity:.3}
+.scene .moon,.scene .stars,.scene .wins{opacity:0;transition:opacity 1.2s}
+.scene[data-tod="night"] .moon,.scene[data-tod="night"] .stars,.scene[data-tod="night"] .wins{opacity:1}
+.scene[data-tod="dusk"] .wins{opacity:.55}
+.scene .st{transform-box:fill-box;transform-origin:center;animation:twinkle 2.6s ease-in-out infinite}
+.scene .st.s2{animation-delay:-.8s}.scene .st.s3{animation-delay:-1.6s}.scene .st.s4{animation-delay:-2.1s}
+@keyframes twinkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+.scene[data-tod="night"] .plane{opacity:.6}
+/* 點人物會跳 */
+.scene [data-hop]{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.scene .hop{transform-box:fill-box;transform-origin:50% 100%}
+.scene .hop.jumping{animation:hopjump .62s cubic-bezier(.3,.7,.4,1)}
+@keyframes hopjump{0%{transform:none}14%{transform:scale(1.1,.86)}42%{transform:translateY(-30px) scale(.94,1.07)}66%{transform:translateY(0) scale(1.08,.9)}82%{transform:scale(.97,1.03)}100%{transform:none}}
+.scene .pop{pointer-events:none;transform-box:fill-box;transform-origin:center;animation:popup .9s ease-out forwards}
+@keyframes popup{0%{opacity:0;transform:translateY(6px) scale(.4)}25%{opacity:1;transform:translateY(-4px) scale(1.1)}100%{opacity:0;transform:translateY(-30px) scale(.9)}}
+@media (prefers-reduced-motion:reduce){.scene .hop.jumping{animation-duration:.3s}.scene .st{animation:none}}
+
 .fade{animation:fadeup .28s ease both}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
@@ -746,8 +783,10 @@ button,input,select,textarea{font-family:inherit}
 
 <div class="wrap" id="app">
   <header class="mast">
-    <div class="scene" aria-hidden="true"><svg viewBox="0 0 340 170" xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round">
-      <g class="sun"><circle cx="300" cy="30" r="16" fill="#F6D27A" stroke="#3E3A39" stroke-width="3"/></g>
+    <div class="scene" id="scene" data-tod="day" aria-hidden="true"><svg viewBox="0 0 340 170" xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round">
+      <defs><linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="sk1"/><stop offset=".62" class="sk2"/><stop offset="1" class="sk3"/></linearGradient></defs>
+      <rect class="sky" x="-4" y="-4" width="348" height="180" fill="url(#skyg)"/>
+      <g class="sunpos"><g class="sun"><circle cx="300" cy="30" r="16" fill="#F6D27A" stroke="#3E3A39" stroke-width="3"/></g></g>
       <g transform="translate(0,-26)"><g class="cloud"><path d="M104 52a14 14 0 0 1 26-6 12 12 0 0 1 20 8 10 10 0 0 1-2 20h-38a11 11 0 0 1-6-22z" fill="#FFFCF6" stroke="#3E3A39" stroke-width="3"/></g></g>
       <g transform="translate(24,-6)"><g class="cloud c2"><path d="M196 30a10 10 0 0 1 19-3 9 9 0 0 1 14 7 8 8 0 0 1-2 15h-26a9 9 0 0 1-5-19z" fill="#FFFCF6" stroke="#3E3A39" stroke-width="3"/></g></g>
       <g transform="translate(-34,-34)"><g class="plane"><path d="M236 84l-26-12 4 10-4 6z" fill="#FFFCF6" stroke="#3E3A39" stroke-width="3"/><path d="M214 82l-26 4M180 90h-18" stroke="#3E3A39" stroke-width="3" stroke-dasharray="2 7" fill="none"/></g></g>
@@ -772,12 +811,21 @@ button,input,select,textarea{font-family:inherit}
         <g class="cart"><rect x="258" y="69" width="18" height="11" rx="4" fill="#F6D27A" stroke-width="2.5"/><circle cx="263" cy="67" r="3.2" fill="#FFFCF6" stroke-width="2"/><circle cx="271" cy="67" r="3.2" fill="#FFFCF6" stroke-width="2"/></g>
         <path d="M244 130h-2M330 112h2" stroke="none"/>
       </g>
-      <path d="M-4 142Q70 122 150 138T344 132V176H-4z" fill="#B9DAA5" stroke="#3E3A39" stroke-width="3"/>
+      <path class="ground" d="M-4 142Q70 122 150 138T344 132V176H-4z" fill="#B9DAA5" stroke="#3E3A39" stroke-width="3"/>
       <g fill="#F2A497" stroke="#3E3A39" stroke-width="2.5"><circle cx="20" cy="158" r="5"/><circle cx="326" cy="156" r="5"/></g>
+      <rect class="veil" x="-4" y="-4" width="348" height="180"/>
+      <g class="moon"><path d="M302 13a18 18 0 1 0 16 29a14 14 0 1 1-16-29z" fill="#FCEFC9" stroke="#3E3A39" stroke-width="3"/></g>
+      <g class="stars" fill="#FCEFC9" stroke="#3E3A39" stroke-width="1.5">
+        <path class="st" d="M176 18l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/>
+        <path class="st s2" d="M236 40l1.6 4 4 1.6-4 1.6-1.6 4-1.6-4-4-1.6 4-1.6z"/>
+        <path class="st s3" d="M112 26l1.6 4 4 1.6-4 1.6-1.6 4-1.6-4-4-1.6 4-1.6z"/>
+        <circle class="st s4" cx="148" cy="52" r="2.2"/><circle class="st s2" cx="262" cy="18" r="2.2"/><circle class="st s3" cx="206" cy="64" r="2"/><circle class="st" cx="92" cy="12" r="2"/>
+      </g>
+      <g class="wins" fill="#F6D27A" stroke="#3E3A39" stroke-width="1.5"><rect x="34" y="101" width="7" height="7" rx="1.5"/><rect x="48" y="101" width="7" height="7" rx="1.5"/><rect x="40" y="77" width="5" height="6" rx="1.2"/><rect x="48" y="77" width="5" height="6" rx="1.2"/><rect x="43" y="59.5" width="6" height="5" rx="1.2"/></g>
       <!-- 小行李箱 -->
       <g transform="translate(146,126)"><rect x="0" y="6" width="30" height="24" rx="7" fill="#F6D27A" stroke="#3E3A39" stroke-width="3"/><path d="M9 6V3a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v3M0 17h30" fill="none" stroke="#3E3A39" stroke-width="3"/><rect x="12" y="14" width="6" height="7" rx="2" fill="#F2A497" stroke="#3E3A39" stroke-width="2"/></g>
       <!-- 無尾熊 -->
-      <g transform="translate(21,35) scale(.72)"><g class="koala">
+      <g transform="translate(21,35) scale(.72)"><g class="hop" data-hop="koala"><g class="koala">
         <ellipse cx="120" cy="138" rx="30" ry="22" fill="#DDD7D1" stroke="#3E3A39" stroke-width="3.5"/>
         <ellipse cx="120" cy="142" rx="16" ry="13" fill="#FFFCF6"/>
         <circle cx="86" cy="86" r="17" fill="#DDD7D1" stroke="#3E3A39" stroke-width="3.5"/><circle cx="86" cy="86" r="8" fill="#F2A497"/>
@@ -787,9 +835,9 @@ button,input,select,textarea{font-family:inherit}
         <ellipse cx="120" cy="114" rx="8" ry="10" fill="#3E3A39"/>
         <circle cx="97" cy="116" r="5" fill="#F2A497"/><circle cx="143" cy="116" r="5" fill="#F2A497"/>
         <path d="M110 126q10 7 20 0" fill="none" stroke="#3E3A39" stroke-width="3.5"/>
-      </g></g>
+      </g></g></g>
       <!-- 小狗 -->
-      <g transform="translate(110,35) scale(.72)"><g class="koala" style="animation-delay:-1.6s">
+      <g transform="translate(110,35) scale(.72)"><g class="hop" data-hop="dog"><g class="koala" style="animation-delay:-1.6s">
         <path d="M152 140c18-4 26-20 16-32" fill="none" stroke="#3E3A39" stroke-width="12"/><path d="M152 140c18-4 26-20 16-32" fill="none" stroke="#E8C48F" stroke-width="6"/>
         <ellipse cx="120" cy="138" rx="30" ry="22" fill="#F0D3A5" stroke="#3E3A39" stroke-width="3.5"/>
         <ellipse cx="120" cy="142" rx="16" ry="13" fill="#FFFCF6"/>
@@ -802,7 +850,7 @@ button,input,select,textarea{font-family:inherit}
         <path d="M120 116v5M112 124q8 6 16 0" fill="none" stroke="#3E3A39" stroke-width="3"/>
         <path d="M114 127q6 10 12 0z" fill="#F2A497" stroke="#3E3A39" stroke-width="2.5"/>
         <circle cx="94" cy="114" r="5" fill="#F2A497"/><circle cx="146" cy="114" r="5" fill="#F2A497"/>
-      </g></g>
+      </g></g></g>
     </svg></div>
     <div class="mt">
       <h1>無尾熊離家記</h1>
@@ -992,7 +1040,7 @@ button,input,select,textarea{font-family:inherit}
       <div class="who2" id="who2" role="tablist"></div>
       <div id="pack"></div>
     </section>
-    <p class="appver">版本 10/25-f</p>
+    <p class="appver">版本 10/25-h</p>
   </main>
 </div>
 
@@ -1238,7 +1286,7 @@ var WEAR={
 };
 
 var DAYS = [
-{id:'d1',n:1,date:'11/02',dow:'一',theme:'啟程，南海難波與心齋橋',dc:'#F2A497',dct:'#3E3A39',
+{id:'d1',n:1,date:'11/02',dow:'一',theme:'啟程，南海難波與心齋橋',dc:'#A6DDD0',dct:'#3E3A39',
  wx:{place:'大阪市區',lo:12,hi:21,tip:'早晚偏涼，帶一件薄外套。機場到飯店移動時間長，鞋子要好走。',q:'大阪 天氣'},
  items:[
  {id:'d1-1',info:'地點：出境報到櫃台依航班看板為準\n注意：護照與電子機票備妥；行動電源隨身帶，不托運。',t:'06:30',manual:1,name:'臺灣桃園國際機場',kind:'transit',stay:60,map:TPE,noRoute:1,hop:{m:'walk',min:9},
@@ -1267,7 +1315,7 @@ var DAYS = [
  {id:'d1-28',info:'地點：西心齋橋一丁目\n注意：請在地圖確認位置與營業時間。',t:'22:04',name:'全家 西心齋橋一丁目店',kind:'food',stay:30,map:'ファミリーマート 西心斎橋一丁目店'}
  ]},
 
-{id:'d2',n:2,date:'11/03',dow:'二',theme:'天保山、古社與日本橋',dc:'#F6D27A',dct:'#3E3A39',
+{id:'d2',n:2,date:'11/03',dow:'二',theme:'天保山、古社與日本橋',dc:'#F7B27A',dct:'#3E3A39',
  wx:{place:'大阪灣・天保山',lo:12,hi:20,tip:'海邊風大，帶防風外套。館內冷氣強，穿件好穿脫的上衣。',q:'大阪 天保山 天氣'},
  items:[
  {id:'d2-1',info:'地點：飯店（房號請自行填寫）\n注意：06:30 出發，預留約 40 分鐘到天保山。',t:'06:30',manual:1,name:'大阪心齋橋橋梁酒店',kind:'stay',stay:70,map:HOTEL,hop:{m:'bus',min:40},
@@ -3289,6 +3337,48 @@ function startCloud(){
   }).catch(function(){ S.mode='local'; });
 })();
 initSupa();
+})();
+
+/* ---------- 首頁插圖：時間與互動 ---------- */
+(function(){
+  var sc=document.getElementById('scene'); if(!sc) return;
+  var R=Math.PI/180;
+  function sunUT(n,lat,lng,rise){
+    var lh=lng/15, t=n+((rise?6:18)-lh)/24, M=0.9856*t-3.289;
+    var L=(M+1.916*Math.sin(M*R)+0.020*Math.sin(2*M*R)+282.634+720)%360;
+    var RA=(Math.atan(0.91764*Math.tan(L*R))/R+720)%360; RA+=Math.floor(L/90)*90-Math.floor(RA/90)*90; RA/=15;
+    var sd=0.39782*Math.sin(L*R), cd=Math.cos(Math.asin(sd));
+    var ch=(Math.cos(90.833*R)-sd*Math.sin(lat*R))/(cd*Math.cos(lat*R)); if(ch>1||ch<-1) return null;
+    var H=(rise?360-Math.acos(ch)/R:Math.acos(ch)/R)/15;
+    return ((H+RA-0.06571*t-6.622-lh)%24+24)%24;
+  }
+  function phase(now){
+    var tz=-now.getTimezoneOffset()/60;
+    var loc=tz===9?[34.69,135.50]:[25.03,121.56];
+    var start=new Date(now.getFullYear(),0,0), n=Math.floor((now-start)/864e5);
+    var r=sunUT(n,loc[0],loc[1],true), s=sunUT(n,loc[0],loc[1],false);
+    var h=now.getHours()+now.getMinutes()/60;
+    if(r==null||s==null){ r=6; s=17.5; } else { r=(r+tz+24)%24; s=(s+tz+24)%24; }
+    if(Math.abs(h-s)<=0.75||Math.abs(h-r)<=0.5) return 'dusk';
+    if(h>r+0.5&&h<s-0.75) return 'day';
+    return 'night';
+  }
+  function apply(){ var p=phase(new Date()); if(sc.getAttribute('data-tod')!==p) sc.setAttribute('data-tod',p); }
+  sc.classList.add('notrans'); apply(); requestAnimationFrame(function(){ requestAnimationFrame(function(){ sc.classList.remove('notrans'); }); });
+  setInterval(apply,60000);
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden) apply(); });
+  var NS='http://www.w3.org/2000/svg';
+  sc.addEventListener('click',function(e){
+    var g=e.target.closest&&e.target.closest('[data-hop]'); if(!g) return;
+    g.classList.remove('jumping'); void g.getBoundingClientRect(); g.classList.add('jumping');
+    var pop=document.createElementNS(NS,'path');
+    pop.setAttribute('class','pop');
+    pop.setAttribute('d','M120 52c-5-7-16-4-14 4 1 5 8 9 14 14 6-5 13-9 14-14 2-8-9-11-14-4z');
+    pop.setAttribute('fill',g.getAttribute('data-hop')==='dog'?'#F7B27A':'#F2A497'); pop.setAttribute('stroke','#3E3A39'); pop.setAttribute('stroke-width','3');
+    g.appendChild(pop); setTimeout(function(){ if(pop.parentNode) pop.parentNode.removeChild(pop); },950);
+    if(navigator.vibrate){ try{ navigator.vibrate(10); }catch(x){} }
+  });
+  sc.addEventListener('animationend',function(e){ if(e.target.classList&&e.target.classList.contains('hop')) e.target.classList.remove('jumping'); });
 })();
 </script>
 
