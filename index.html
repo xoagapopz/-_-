@@ -537,6 +537,11 @@ html,body{touch-action:manipulation}
 #lb.zoomed .lbnav,#lb.zoomed #lb-hint,#lb.zoomed .fbtns{opacity:0;pointer-events:none}
 #lb-q{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:2;padding:3px 12px;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:700}
 #lb-hint{color:rgba(255,255,255,.7);font-size:12px}
+#lb.full{padding:0;gap:0;background:#000}
+#lb.full img{width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;object-fit:contain;border-radius:0;background:transparent}
+#lb.full .fbtns,#lb.full .lbnav,#lb.full #lb-hint,#lb.full #lb-q{display:none}
+#lb-fh{position:absolute;left:50%;bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:3;padding:6px 16px;border-radius:999px;background:rgba(255,252,246,.92);color:#3E3A39;border:2px solid #3E3A39;font-size:13px;white-space:nowrap;pointer-events:none;transition:opacity .4s}
+#lb-fh.off{opacity:0}
 .syncpill{display:inline-flex;align-items:center;gap:6px;margin:6px 0 0 8px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:12.5px;font-weight:700;color:var(--ink2)}
 .syncpill.ok{color:var(--matcha)}
 .syncpill.warn{color:var(--kin)}
@@ -987,7 +992,7 @@ button,input,select,textarea{font-family:inherit}
       <div class="who2" id="who2" role="tablist"></div>
       <div id="pack"></div>
     </section>
-    <p class="appver">版本 10/25-c</p>
+    <p class="appver">版本 10/25-d</p>
   </main>
 </div>
 
@@ -1025,7 +1030,7 @@ button,input,select,textarea{font-family:inherit}
   </div>
   <p class="lead" id="au-msg" style="margin:0"></p>
 </div></div>
-<div id="lb" hidden><span id="lb-q" hidden></span><img id="lb-img" alt="放大圖片" draggable="false"><span id="lb-hint">兩指縮放・點兩下放大</span><div class="lbnav" id="lb-nav" hidden><button type="button" id="lb-prev" aria-label="上一張">‹</button><span id="lb-cnt"></span><button type="button" id="lb-next" aria-label="下一張">›</button></div><div class="fbtns"><button class="btn" type="button" id="lb-x">關閉</button><button class="btn ghost" style="color:#fff" type="button" id="lb-del" hidden>刪除這張照片</button></div></div>
+<div id="lb" hidden><span id="lb-q" hidden></span><img id="lb-img" alt="放大圖片" draggable="false"><span id="lb-hint">兩指縮放・點兩下放大</span><div class="lbnav" id="lb-nav" hidden><button type="button" id="lb-prev" aria-label="上一張">‹</button><span id="lb-cnt"></span><button type="button" id="lb-next" aria-label="下一張">›</button></div><span id="lb-fh" hidden>向上滑動即可關閉全螢幕</span><div class="fbtns"><button class="btn" type="button" id="lb-x">關閉</button><button class="btn" type="button" id="lb-full" aria-label="全螢幕"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>全螢幕</button><button class="btn ghost" style="color:#fff" type="button" id="lb-del" hidden>刪除這張照片</button></div></div>
 
 <script>
 (function(){
@@ -2550,7 +2555,18 @@ function zClamp(){
   var mx=Math.max(0,(w-vw)/2+20), my=Math.max(0,(h-vh)/2+20);
   Z.x=Math.max(-mx,Math.min(mx,Z.x)); Z.y=Math.max(-my,Math.min(my,Z.y));
 }
-var lbCur=null;
+var lbCur=null, fhTimer=0;
+function enterFull(){
+  var lb=$('#lb'); lb.classList.add('full'); zReset();
+  var h=$('#lb-fh'); h.hidden=false; h.classList.remove('off'); clearTimeout(fhTimer); fhTimer=setTimeout(function(){ h.classList.add('off'); },2800);
+  try{ var rq=lb.requestFullscreen||lb.webkitRequestFullscreen; if(rq&&!document.fullscreenElement) { var pr=rq.call(lb); if(pr&&pr.catch) pr.catch(function(){}); } }catch(x){}
+}
+function exitFull(){
+  var lb=$('#lb'); lb.classList.remove('full'); $('#lb-fh').hidden=true; clearTimeout(fhTimer); zReset();
+  try{ if(document.fullscreenElement&&document.exitFullscreen) { var pr=document.exitFullscreen(); if(pr&&pr.catch) pr.catch(function(){}); } }catch(x){}
+}
+document.addEventListener('fullscreenchange',function(){ if(!document.fullscreenElement&&$('#lb').classList.contains('full')) exitFull(); });
+new MutationObserver(function(){ if($('#lb').hidden&&$('#lb').classList.contains('full')) exitFull(); }).observe($('#lb'),{attributes:true,attributeFilter:['hidden']});
 function lbSrc(thumb){
   var im=$('#lb-img'); lbCur=thumb; im.src=thumb; zReset();
   var tag=$('#lb-q'); tag.hidden=true;
@@ -2680,7 +2696,7 @@ function resetForm(k){
 
 /* ---------- 事件 ---------- */
 document.addEventListener('click',function(e){
-  var t=e.target.closest('[data-day],[data-tab],[data-seg],[data-copy],[data-lb],[data-del],[data-used],[data-jump],[data-openform],[data-closeform],[data-fillflight],[data-toggle-edit],[data-reset],[data-inreset],[data-indone],[data-lbg],#lb-prev,#lb-next,[data-prem],[data-cprem],[data-delx],[data-addopen],[data-addsave],[data-addcancel],[data-gowx],#lb-del,[data-fview],[data-fedit],[data-sclose],[data-delo],[data-undel],[data-tkopen],[data-tksave],[data-pdf],#pv-x,[data-tkwho],[data-route],[data-rsel],[data-redit],[data-rnew],#r-cancel,#r-save,[data-rdel],[data-who],[data-pkx],[data-say],[data-jedit],[data-jdel],#sheet,#h-edit,#h-save,#j-save,#pk-add,#lb-x,#lb,#f-save,#c-save,#k-save,#p-save,#s-save');
+  var t=e.target.closest('[data-day],[data-tab],[data-seg],[data-copy],[data-lb],[data-del],[data-used],[data-jump],[data-openform],[data-closeform],[data-fillflight],[data-toggle-edit],[data-reset],[data-inreset],[data-indone],[data-lbg],#lb-full,#lb-prev,#lb-next,[data-prem],[data-cprem],[data-delx],[data-addopen],[data-addsave],[data-addcancel],[data-gowx],#lb-del,[data-fview],[data-fedit],[data-sclose],[data-delo],[data-undel],[data-tkopen],[data-tksave],[data-pdf],#pv-x,[data-tkwho],[data-route],[data-rsel],[data-redit],[data-rnew],#r-cancel,#r-save,[data-rdel],[data-who],[data-pkx],[data-say],[data-jedit],[data-jdel],#sheet,#h-edit,#h-save,#j-save,#pk-add,#lb-x,#lb,#f-save,#c-save,#k-save,#p-save,#s-save');
   if(!t) return;
   if(t.hasAttribute('data-inreset')){ var irid=t.getAttribute('data-inreset'); delete S.notes['i_'+irid]; queueNotes(); swapInfo(irid); toast('已還原預設內容'); return; }
   if(t.hasAttribute('data-indone')){ var idn=t.getAttribute('data-indone'); editInfo=null; flushNotes(); swapInfo(idn); toast('注意事項已儲存'); return; }
@@ -2690,6 +2706,7 @@ document.addEventListener('click',function(e){
   if(t.hasAttribute('data-copy')){ copyText(t.getAttribute('data-copy')); return; }
   if(t.hasAttribute('data-cprem')){ pendCp.splice(parseInt(t.getAttribute('data-cprem'),10),1); renderPendCp(); return; }
   if(t.hasAttribute('data-prem')){ pendTip.splice(parseInt(t.getAttribute('data-prem'),10),1); renderPendTip(); return; }
+  if(t.id==='lb-full'){ enterFull(); return; }
   if(t.id==='lb-prev'){ lbStep(-1); return; }
   if(t.id==='lb-next'){ lbStep(1); return; }
   if(t.hasAttribute('data-lbg')){ var tpi=S.items[t.getAttribute('data-lbg')]; if(tpi){ lbSet={list:tipImgs(tpi),i:parseInt(t.getAttribute('data-i'),10)||0}; if(lbSet.list.length){ lbShow(); $('#lb').hidden=false; } } return; }
@@ -3056,7 +3073,7 @@ document.addEventListener('keydown',function(e){
 document.addEventListener('toggle',function(e){ var d=e.target; if(d&&d.classList&&d.classList.contains('infod')&&d.open){ var ta=$('textarea',d); if(ta) autosize(ta); } },true);
 (function(){ var sx=null,sy=null,lb=$('#lb');
   lb.addEventListener('touchstart',function(e){ if(e.touches.length>1){ sx=null; return; } var t=e.touches[0]; sx=t.clientX; sy=t.clientY; },{passive:true});
-  lb.addEventListener('touchend',function(e){ if(sx==null) return; if(Z.z>1.01||Z.multi||e.touches.length){ sx=null; return; } var t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy; sx=null; if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.5) lbStep(dx<0?1:-1); },{passive:true});
+  lb.addEventListener('touchend',function(e){ if(sx==null) return; if(Z.z>1.01||Z.multi||e.touches.length){ sx=null; return; } var t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy; sx=null; if(lb.classList.contains('full')&&dy<-70&&Math.abs(dy)>Math.abs(dx)*1.5){ exitFull(); return; } if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.5) lbStep(dx<0?1:-1); },{passive:true});
   document.addEventListener('keydown',function(e){ if(lb.hidden) return; if(e.key==='ArrowLeft') lbStep(-1); else if(e.key==='ArrowRight') lbStep(1); else if(e.key==='Escape') lb.hidden=true; });
 })();
 document.addEventListener('visibilitychange',function(){ if(document.hidden){ clearTimeout(nTimer); flushNotes(); } });
