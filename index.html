@@ -778,6 +778,99 @@ button,input,select,textarea{font-family:inherit}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
+
+/* 刷卡記帳 */
+.ccards{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
+.ccard{display:flex;flex-direction:column;gap:8px;padding:14px 16px;border:var(--bd);border-radius:24px;background:#FFFCF6}
+.cc-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.cc-top b{font-size:17px;font-weight:400}
+.cc-pct{font-size:26px;line-height:1;font-variant-numeric:tabular-nums}
+.cc-bar{height:18px;border:2.5px solid #3E3A39;border-radius:999px;background:var(--ct);overflow:hidden}
+.cc-bar i{display:block;height:100%;background:var(--cc);border-right:2.5px solid #3E3A39;border-radius:0 999px 999px 0;transition:width .5s cubic-bezier(.3,.7,.4,1)}
+.cc-bar i[style*="width:0.00%"]{border-right:0}
+.cc-nums{font-size:13px;color:#6E6663;font-variant-numeric:tabular-nums}
+.cc-left{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;font-size:14px;font-variant-numeric:tabular-nums}
+.cc-left b{font-size:18px;font-weight:400}
+.cc-left small{color:#6E6663}
+.ccard.full{background:var(--ct)}
+.ccard.full .cc-left{color:#3E3A39;font-weight:700}
+.fxbox{margin-top:14px;padding:12px 14px;border:2px solid #3E3A39;border-radius:20px;background:#FFFCF6;display:flex;flex-direction:column;gap:6px}
+.fxrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.fxrow label{font-size:14px}
+.fxrow input{width:110px;padding:6px 10px;border:2px solid #3E3A39;border-radius:12px;background:#FFFCF6;font-size:16px;text-align:right;font-variant-numeric:tabular-nums}
+.fxmeta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 10px;font-size:12px;color:#6E6663}
+.fxmeta a{color:#3E3A39}
+.acform{margin-top:14px;display:flex;flex-direction:column;gap:12px;padding:14px}
+.ac-h{font-size:16px}
+.ac-pick{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ac-pick button{padding:10px 8px;border:2px solid #3E3A39;border-radius:16px;background:#FFFCF6;color:#3E3A39;font-size:14.5px}
+.ac-pick button[aria-checked="true"]{background:var(--cc);box-shadow:inset 0 0 0 2px #3E3A39}
+.ac-amt{display:flex;flex-direction:column;gap:6px;font-size:13px;color:#6E6663}
+.ac-in{display:flex;align-items:center;gap:6px;padding:6px 14px;border:2.5px solid #3E3A39;border-radius:18px;background:#FFFCF6}
+.ac-in b{font-size:24px;font-weight:400;color:#3E3A39}
+.ac-in input{flex:1;min-width:0;border:0;background:transparent;font-size:28px;color:#3E3A39;font-variant-numeric:tabular-nums;padding:2px 0}
+.ac-in input:focus{outline:none}
+.ac-in:focus-within{box-shadow:0 0 0 3px #F6D27A}
+.ac-conv{font-size:15px;font-variant-numeric:tabular-nums}
+.ac-conv b{font-size:20px;font-weight:400}
+.ac-conv small{margin-left:6px;font-size:12px;color:#6E6663}
+.ac-row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.ac-row2 label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:#6E6663;min-width:0}
+.ac-row2 input{width:100%;padding:8px 10px;border:2px solid #3E3A39;border-radius:12px;background:#FFFCF6;font-size:15px;color:#3E3A39}
+.ac-row2 input{box-sizing:border-box;min-width:0;max-width:100%;height:46px;margin:0;-webkit-appearance:none;appearance:none;display:block;line-height:normal}
+.ac-row2 input[type=date]{text-align:left;padding-right:8px}
+.ac-row2 input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
+.ac-row2 input[type=date]::-webkit-calendar-picker-indicator{margin-left:auto}
+#ac-add{align-self:stretch;justify-content:center;font-size:15px;padding:11px}
+.aclist{display:flex;flex-direction:column;gap:8px}
+.acr{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"card main amt" "del del del";gap:6px 10px;align-items:center;padding:10px 12px;border:2px solid #3E3A39;border-radius:18px;background:#FFFCF6}
+.acr-card{grid-area:card;padding:2px 9px;border:2px solid #3E3A39;border-radius:999px;background:var(--cc);font-size:12px;white-space:nowrap}
+.acr-main{grid-area:main;display:flex;flex-direction:column;min-width:0}
+.acr-main b{font-weight:400;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acr-main small,.acr-amt small{font-size:11.5px;color:#6E6663}
+.acr-amt{grid-area:amt;display:flex;flex-direction:column;align-items:flex-end;font-variant-numeric:tabular-nums}
+.acr-amt b{font-weight:400;font-size:15px}
+.acr .mini{grid-area:del;justify-self:end;padding:3px 10px;font-size:12px}
+@media (min-width:520px){.ccards{grid-template-columns:1fr 1fr}.acr{grid-template-areas:"card main amt del";grid-template-columns:auto minmax(0,1fr) auto auto}}
+
+.perkbtn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:4px;padding:9px 12px;border:2px solid #3E3A39;border-radius:16px;background:var(--ct);color:#3E3A39;font-size:14px}
+.perkbtn .chev{display:inline-flex;transition:transform .2s}
+.perkbtn .chev .ic{width:16px;height:16px}
+.perkbtn[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.perks{display:flex;flex-direction:column;gap:10px;padding:12px 14px;border:2px dashed #3E3A39;border-radius:18px;background:#FFFCF6}
+.perk h4{display:inline-block;margin:0 0 4px;padding:1px 10px;border:2px solid #3E3A39;border-radius:999px;background:var(--cc);font-size:13px;font-weight:400;color:#3E3A39}
+.perk p{margin:0;font-size:14px;line-height:1.65;color:#3E3A39}
+.perk ul,.perk ol{margin:0;padding-left:22px;font-size:14px;line-height:1.7;color:#3E3A39}
+.ccard.full .perkbtn{background:#FFFCF6}
+
+.acwho{margin:10px 0 2px}
+.ac-pick.n3{grid-template-columns:1fr 1fr 1fr}
+.ac-pick.n3 button{font-size:13.5px;padding:10px 4px}
+.sumcard{gap:10px}
+.sum-total{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px;font-variant-numeric:tabular-nums}
+.sum-total b{font-size:26px;font-weight:400}
+.sum-total span{font-size:14px;color:#6E6663}
+.sum-split{display:flex;flex-direction:column;gap:8px}
+.sum-row{display:grid;grid-template-columns:66px minmax(0,1fr) 84px;align-items:center;gap:10px}
+.sum-row .acr-card{grid-area:auto;min-width:0;width:100%;box-sizing:border-box;text-align:center;padding:2px 4px}
+.sum-bar{height:12px;border:2px solid #3E3A39;border-radius:999px;background:#F1EBDF;overflow:hidden}
+.sum-bar i{display:block;height:100%;background:var(--cc)}
+.sum-n{display:flex;flex-direction:column;align-items:flex-end;font-variant-numeric:tabular-nums}
+.sum-n b{font-weight:400;font-size:14.5px}
+.sum-n small{font-size:11.5px;color:#6E6663}
+
+.wx-nums{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin-top:4px;font-variant-numeric:tabular-nums}
+.wx-hi{font-size:26px;line-height:1;color:#C7564A}
+.wx-lo{font-size:18px;line-height:1;color:#4A7A9A}
+.wx-pop{display:inline-flex;align-items:center;padding:1px 9px;border:2px solid #3E3A39;border-radius:999px;background:#DCEEF5;font-size:12.5px;color:#3E3A39}
+.wx-rain{margin-top:6px;padding:5px 10px;border:2px solid #3E3A39;border-radius:12px;background:#DCEEF5;font-size:13px;color:#3E3A39}
+.wtk{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px}
+.wtk .ic{width:24px;height:24px}
+.wtk b{font-weight:400;font-size:16px}
+.wtk small{font-size:12px;color:#6E6663}
+
+.wacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:2px}
+.wacts .mini{display:flex;align-items:center;justify-content:center;min-width:0;padding:7px 4px;font-size:12.5px;white-space:nowrap;text-align:center;text-decoration:none;color:#3E3A39}
 </style>
 
 
@@ -1029,9 +1122,29 @@ button,input,select,textarea{font-family:inherit}
 
     </section>
 
+    <section id="tab-acct" hidden aria-label="記帳">
+      <div class="sec-h"><h2>旅費記帳</h2></div>
+      <div class="who2 acwho" id="ac-who" role="tablist" aria-label="選擇記帳的人"></div>
+      <div class="ccards" id="ac-top"></div>
+      <div class="fxbox">
+        <div class="fxrow"><label for="ac-rate">台銀日圓即期賣出匯率</label><input id="ac-rate" type="number" inputmode="decimal" step="0.0001" min="0.05" max="1"></div>
+        <div class="fxmeta"><span id="ac-ratenote"></span><a href="https://rate.bot.com.tw/xrt?Lang=zh-TW" target="_blank" rel="noopener">查看台銀今日匯率 ›</a></div>
+      </div>
+      <div class="panel acform">
+        <div class="ac-h">新增一筆消費</div>
+        <div class="ac-pick" id="ac-pick" role="radiogroup" aria-label="選擇付款方式"></div>
+        <label class="ac-amt" for="ac-jpy"><span>消費金額</span><span class="ac-in"><b>¥</b><input id="ac-jpy" type="text" inputmode="numeric" placeholder="0" autocomplete="off"></span></label>
+        <div class="ac-conv" id="ac-conv">約 NT$ 0</div>
+        <div class="ac-row2"><label>日期<input id="ac-date" type="date"></label><label>店家／備註<input id="ac-note" type="text" placeholder="例：唐吉訶德"></label></div>
+        <button type="button" class="btn shu" id="ac-add">＋ 新增這筆</button>
+      </div>
+      <div class="ccards" id="ac-cards"></div>
+      <div class="sec-h" style="margin-top:22px"><h2 id="ac-listh">消費紀錄</h2><small id="ac-sum"></small></div>
+      <div id="ac-list"></div>
+    </section>
     <section id="tab-wx" hidden aria-label="天氣">
-      <div class="sec-h"><h2>天氣與穿著</h2><small>11 月初歷年氣候</small></div>
-      <p class="lead">以下為歷年同時期的氣溫範圍，不是即時氣象。</p>
+      <div class="sec-h"><h2>天氣與穿著</h2><small>tenki.jp 預報</small></div>
+      <p class="lead">資料來自日本氣象協會 tenki.jp 大阪市的 2 週天氣預報（10/31 03:00 發表）。越接近出發預報越準，出發前可以點「tenki.jp 最新預報」再確認。</p>
       <div class="list" id="wxlist" style="margin-top:10px"></div>
     </section>
 
@@ -1040,7 +1153,7 @@ button,input,select,textarea{font-family:inherit}
       <div class="who2" id="who2" role="tablist"></div>
       <div id="pack"></div>
     </section>
-    <p class="appver">版本 10/25-h</p>
+    <p class="appver">版本 10/31-l</p>
   </main>
 </div>
 
@@ -1050,7 +1163,7 @@ button,input,select,textarea{font-family:inherit}
   <button class="tb" type="button" data-tab="plan" aria-selected="true"><svg class="ic" viewBox="0 0 24 24"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>行程</button>
   <button class="tb" type="button" data-tab="wx" aria-selected="false"><svg class="ic" viewBox="0 0 24 24"><path d="M12 2v2M4.9 4.9l1.4 1.4M2 12h2M19.1 4.9l-1.4 1.4"/><path d="M8 12a4 4 0 0 1 7.6-1.7"/><path d="M17.5 19H9a5 5 0 1 1 4.7-6.7A3.5 3.5 0 1 1 17.5 19z"/></svg>天氣</button>
   <button class="tb" type="button" data-tab="tools" aria-selected="false"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg>工具</button>
-  <button class="tb" type="button" data-tab="guide" aria-selected="false"><svg class="ic" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>指南</button>
+  <button class="tb" type="button" data-tab="acct" aria-selected="false"><svg class="ic" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/><path d="M6.5 15h4"/></svg>記帳</button>
 </div></nav>
 <div id="pdfv" hidden role="dialog" aria-modal="true" aria-label="PDF 門票"><div class="pv-bar"><b id="pv-name"></b><button class="btn sm" type="button" id="pv-x">關閉</button></div><div id="pv-pages"></div></div>
 <div id="sheet" hidden><div class="in" id="sheet-in" role="dialog" aria-modal="true" aria-label="航班詳細資訊"></div></div>
@@ -1108,6 +1221,8 @@ var IC = {
   phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>',
   route:'<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>',
   check:'<path d="M20 6 9 17l-5-5"/>',
+  rain:'<path d="M17.5 15H8a5 5 0 1 1 4.6-7A3.5 3.5 0 1 1 17.5 15z"/><path d="M9 18l-1 3M13 18l-1 3M17 18l-1 3"/>',
+  suncloud:'<path d="M8 3v1.5M3.6 4.6l1 1M2 9h1.5M12.4 4.6l-1 1"/><path d="M5.2 11A3.5 3.5 0 0 1 11.6 8"/><path d="M18 20H9.5a4 4 0 1 1 3.7-5.5A3 3 0 1 1 18 20z"/>',
   alert:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
   file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 18h4"/>',
   star:'<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>',
@@ -1562,6 +1677,18 @@ var openEdit=null, planSig='';
 function toMin(t){ var m=/^(\d{1,2}):(\d{2})/.exec(t||''); return m?(+m[1])*60+(+m[2]):null; }
 function fromMin(n){ n=((n%1440)+1440)%1440; return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0'); }
 DAYS.forEach(function(d){ d.items.forEach(function(it){ if(KIND_SET[it.id]) it.kind=KIND_SET[it.id]; }); });
+/* tenki.jp 大阪市浪速區 2 週間天氣預報（10/31 03:00 發表） */
+var TENKI_URL='https://tenki.jp/forecast/6/30/6200/27111/10days.html', TENKI_AT='10/31 03:00 發表';
+var TENKI={
+ d1:{jp:'曇一時雨',zh:'多雲，短暫有雨',ico:'rain',hi:20,lo:16,pop:80,mm:5},
+ d2:{jp:'晴',zh:'晴',ico:'sun',hi:23,lo:14,pop:20,mm:0},
+ d3:{jp:'晴のち曇',zh:'晴轉多雲',ico:'suncloud',hi:23,lo:13,pop:30,mm:0},
+ d4:{jp:'曇一時雨',zh:'多雲，短暫有雨',ico:'rain',hi:20,lo:15,pop:70,mm:2},
+ d5:{jp:'曇のち晴',zh:'多雲轉晴',ico:'suncloud',hi:22,lo:16,pop:40,mm:0},
+ d6:{jp:'晴時々曇',zh:'晴時多雲',ico:'suncloud',hi:18,lo:12,pop:20,mm:0}
+};
+DAYS.forEach(function(d){ var t=TENKI[d.id]; if(t){ d.wx.lo=t.lo; d.wx.hi=t.hi; } });
+function rainTip(t){ if(!t) return ''; if(t.pop>=60) return '降雨機率 '+t.pop+'%，記得帶折疊傘或輕便雨衣'; if(t.pop>=40) return '降雨機率 '+t.pop+'%，包包放一把折疊傘比較安心'; return ''; }
 var NEXT={};
 DAYS.forEach(function(d){ d.items.forEach(function(it,i){ NEXT[it.id]=d.items[i+1]?d.items[i+1].id:null; }); });
 function copyObj(o){ var r={}; Object.keys(o).forEach(function(k){r[k]=o[k];}); return r; }
@@ -1777,14 +1904,16 @@ function legHtml(it,nx,linked){
   return '<div class="hop">'+pill+link+'</div>';
 }
 function heroHtml(d){
-  var w=d.wx, f=S.forecast[d.id];
+  var w=d.wx, f=S.forecast[d.id], tk=TENKI[d.id];
   var live=f?('<div class="wx-live"><b>預報 '+esc(f.lo)+'–'+esc(f.hi)+'°C</b>　'+esc(f.desc||'')+(f.pop!=null?'　降雨 '+esc(f.pop)+'%':'')+(f.updated?'　<small>更新 '+esc(f.updated)+'</small>':'')+'</div>'):'';
   var stops=dayItems(d).length;
   return '<section class="hero" style="--dc:'+d.dc+'">'+
     '<div class="hero-top"><span class="dnum">第 '+d.n+' 天</span><span class="ddate">'+d.date+' 星期'+d.dow+'　·　'+esc(w.place)+'</span></div>'+
     '<h2>'+esc(d.theme)+'</h2>'+
-    '<div class="wx">'+ic('sun')+'<div class="wx-main"><div class="wx-t">'+esc(w.place)+'　11 月初的典型氣候 <b>約 '+w.lo+'–'+w.hi+'°C</b></div><div class="wx-s">'+esc(w.tip)+'</div>'+live+'</div>'+
-    '<div class="wx-foot"><a class="btn ghost sm" href="'+wxUrl(w.q)+'" target="_blank" rel="noopener">開啟天氣 App</a><span>'+''+'</span></div></div>'+
+    '<div class="wx">'+ic(tk?tk.ico:'sun')+'<div class="wx-main"><div class="wx-t">'+(tk?'大阪 預報 <b>'+esc(tk.zh)+'</b>':esc(w.place))+'</div>'+
+      (tk?'<div class="wx-nums"><span class="wx-hi">'+tk.hi+'°</span><span class="wx-lo">'+tk.lo+'°</span><span class="wx-pop">☂ '+tk.pop+'%'+(tk.mm?'・'+tk.mm+'mm':'')+'</span></div>':'')+
+      (rainTip(tk)?'<div class="wx-rain">'+esc(rainTip(tk))+'</div>':'')+'<div class="wx-s">'+esc(w.tip)+'</div>'+live+'</div>'+
+    '<div class="wx-foot"><a class="btn ghost sm" href="'+TENKI_URL+'" target="_blank" rel="noopener">tenki.jp 最新預報</a><a class="btn ghost sm" href="'+wxUrl(w.q)+'" target="_blank" rel="noopener">開啟天氣 App</a><span>'+TENKI_AT+'</span></div></div>'+
     '<div class="hero-act"><a class="btn" href="'+routeUrl(d)+'" target="_blank" rel="noopener">'+ic('route')+'整天路線導航</a><small>共 '+stops+' 站</small></div>'+
     '</section>';
 }
@@ -2058,17 +2187,19 @@ function addHtml(d){
 }
 function wearHtml(d){
   var w=WEAR[d.id]||[];
-  return '<section class="wear"><h3>'+ic('shirt')+'建議穿著</h3><div class="tmp">'+esc(d.wx.place)+'　約 '+d.wx.lo+'–'+d.wx.hi+'°C（歷年同期）</div><ul>'+w.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></section>';
+  return '<section class="wear"><h3>'+ic('shirt')+'建議穿著</h3><div class="tmp">'+esc(d.wx.place)+'　'+d.wx.lo+'–'+d.wx.hi+'°C（tenki.jp 預報）</div>'+(rainTip(TENKI[d.id])?'<div class="tmp">☂ '+esc(rainTip(TENKI[d.id]))+'</div>':'')+'<ul>'+w.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></section>';
 }
 function renderWx(){
   var lo=Math.min.apply(null,DAYS.map(function(d){return d.wx.lo;}))-2, hi=Math.max.apply(null,DAYS.map(function(d){return d.wx.hi;}))+2;
   $('#wxlist').innerHTML=DAYS.map(function(d,i){
-    var w=d.wx, f=S.forecast[d.id], L=(w.lo-lo)/(hi-lo)*100, R=(w.hi-lo)/(hi-lo)*100;
+    var w=d.wx, f=S.forecast[d.id], tk=TENKI[d.id], L=(w.lo-lo)/(hi-lo)*100, R=(w.hi-lo)/(hi-lo)*100;
     return '<div class="wcard" style="--dc:'+d.dc+';--dct:'+d.dct+'"><div class="wt"><span class="wd">第 '+d.n+' 天　'+d.date+'（'+d.dow+'）</span><span class="wp">'+esc(w.place)+'</span></div>'+
-      '<div class="trange" role="img" aria-label="約 '+w.lo+' 到 '+w.hi+' 度"><i style="left:'+L.toFixed(1)+'%;right:'+(100-R).toFixed(1)+'%"></i></div><div class="trange-l"><span>低 '+w.lo+'°C</span><span>高 '+w.hi+'°C</span></div>'+
+      (tk?'<div class="wtk">'+ic(tk.ico)+'<b>'+esc(tk.zh)+'</b><small>'+esc(tk.jp)+'</small><span class="wx-pop">☂ '+tk.pop+'%'+(tk.mm?'・'+tk.mm+'mm':'')+'</span></div>':'')+
+      '<div class="trange" role="img" aria-label="最低 '+w.lo+' 度，最高 '+w.hi+' 度"><i style="left:'+L.toFixed(1)+'%;right:'+(100-R).toFixed(1)+'%"></i></div><div class="trange-l"><span>低 '+w.lo+'°C</span><span>高 '+w.hi+'°C</span></div>'+
+      (rainTip(tk)?'<div class="wx-rain">'+esc(rainTip(tk))+'</div>':'')+
       (f?'<div class="wx-live" style="background:var(--kin-t);color:var(--ink)"><b>預報 '+esc(f.lo)+'–'+esc(f.hi)+'°C</b>　'+esc(f.desc||'')+(f.pop!=null?'　降雨 '+esc(f.pop)+'%':'')+'</div>':'')+
       '<div class="desc">'+esc(w.tip)+'</div><ul style="margin:0;padding-left:20px;font-size:13.5px;line-height:1.7">'+(WEAR[d.id]||[]).map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>'+
-      '<div class="acts"><a class="mini" href="'+wxUrl(w.q)+'" target="_blank" rel="noopener">'+ic('sun')+'開啟天氣 App</a><button type="button" class="mini" data-gowx="'+i+'">看當天行程</button></div></div>';
+      '<div class="wacts"><a class="mini" href="'+TENKI_URL+'" target="_blank" rel="noopener">tenki.jp 預報</a><a class="mini" href="'+wxUrl(w.q)+'" target="_blank" rel="noopener">天氣 App</a><button type="button" class="mini" data-gowx="'+i+'">當天行程</button></div></div>';
   }).join('');
 }
 function renderDay(){
@@ -2443,7 +2574,8 @@ function renderCodes(){
     return '<div class="cd"><b>'+esc(r[2])+'</b><button type="button" class="mini" data-copy="'+esc(r[2])+'">'+ic('copy')+'複製</button><small>第 '+r[0].n+' 天　'+esc(r[1].name)+'　'+esc(r[1].bookLabel||'')+'</small></div>';
   }).join(''):'<div class="empty"><b>還沒有預約代號</b>在行程卡或導遊頁的預約欄貼上代號，就會出現在這裡。</div>';
 }
-function renderTools(){ renderOverview(); renderPhrases(); renderSos(); renderTickets(); renderTips(); renderCoupons(); renderCodes(); renderCustoms(); if(usjOpen&&!usjEd) renderUsj(); }
+function renderTools(){ renderToolsInner(); renderAcct(); }
+function renderToolsInner(){ renderOverview(); renderPhrases(); renderSos(); renderTickets(); renderTips(); renderCoupons(); renderCodes(); renderCustoms(); if(usjOpen&&!usjEd) renderUsj(); }
 
 /* 更新（雲端同步或其他裝置變更）時，不打斷正在輸入的欄位 */
 function renderLive(){
@@ -2476,7 +2608,7 @@ function renderLive(){
 
 /* ---------- 分頁、倒數 ---------- */
 function showTab(name){
-  ['plan','guide','tools','over','pack','wx'].forEach(function(n){ $('#tab-'+n).hidden=(n!==name); });
+  ['plan','guide','tools','over','pack','wx','acct'].forEach(function(n){ $('#tab-'+n).hidden=(n!==name); });
   $$('.tb').forEach(function(b){ b.setAttribute('aria-selected',String(b.getAttribute('data-tab')===name)); });
   try{ localStorage.setItem(LSK+'-tab',name); }catch(e){}
   var sec=$('#tab-'+name); if(sec){ sec.classList.remove('fade'); void sec.offsetWidth; sec.classList.add('fade'); }
@@ -3155,7 +3287,7 @@ renderDays(); renderDay(); renderGuide(); renderTools(); renderPack(); renderWx(
   el.addEventListener('touchstart',function(e){ var t=e.touches[0]; if(e.target.closest('input,textarea,select,.jr-g')){x0=null;return;} x0=t.clientX; y0=t.clientY; },{passive:true});
   el.addEventListener('touchend',function(e){ if(x0==null) return; var t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0; x0=null; if(Math.abs(dx)>70&&Math.abs(dy)<45){ var n=cur+(dx<0?1:-1); if(n>=0&&n<DAYS.length) selectDay(n); } },{passive:true});
 })();
-try{ var tb=localStorage.getItem(LSK+'-tab'); if(['guide','tools','over','pack','wx'].indexOf(tb)>=0) showTab(tb); }catch(e){}
+try{ var tb=localStorage.getItem(LSK+'-tab'); if(['tools','over','pack','wx','acct'].indexOf(tb)>=0) showTab(tb); }catch(e){}
 
 /* ---------- Supabase 雲端同步（放在 GitHub Pages 等一般網站時使用；在 claude.ai 內改用內建儲存） ---------- */
 var SUPA_URL='https://kaomccchtfvdajaleuai.supabase.co';
@@ -3337,6 +3469,110 @@ function startCloud(){
   }).catch(function(){ S.mode='local'; });
 })();
 initSupa();
+
+/* ---------- 刷卡記帳：信用卡回饋額度 ---------- */
+var CARDS=[{id:'kk',name:'聯邦吉鶴卡',cap:20000,c:'#F2A497',t:'#FBE0DA'},{id:'jc',name:'富邦 J 卡',cap:33333,c:'#A8D3E6',t:'#DCEEF5'}];
+var FX_DEF={r:0.2089,d:'2026/10/31'};
+/* 回饋條件：[小標題, 內容, 類型]；類型 p=段落 ol=編號清單 ul=清單 */
+var PERKS={
+ kk:[
+  ['日本三大交通卡儲值最高1.5%','活動期間使用吉鶴卡日幣儲值SUICA、ICOCA 、PASMO享1.5%回饋。','p'],
+  ['日本旅遊祭最高11%回饋組成','日幣消費2.5%(無上限)+行動支付(Google Pay/Apple Pay)加碼1.5%+指定商店3%(活動期間上限600元)+新戶日本實體消費3%(活動期間上限600元)','p'],
+  ['指定日本熱門商店',['便利商店：7-ELEVEN、FamilyMart、LAWSON','遊樂園：東京迪士尼、大阪環球影城','百貨公司：永旺、三越、高島屋','量販：BIC CAMERA、Yodobashi、唐吉訶德'],'ul'],
+  ['必備條件',['需使用行動支付(Apple Pay/Google Pay)','單筆需滿NT$100'],'ol'],
+  ['一般消費回饋無上限',['日幣消費 2.5%','國內消費 1%','國外消費 1%'],'ul']
+ ],
+ jc:[
+  ['日本三大交通卡最高10%回饋',['2026/04/01~2026/12/31','活動內容期間以Apple Pay綁定J卡並刷付日本Suica、PASMO或ICOCA卡儲值金，單筆滿新台幣2,000元，享最高10%回饋。'],'ps'],
+  ['J卡日韓泰旅遊最高6%','活動期間Ｊ卡單筆滿新台幣1,000元，日韓泰實體消費加碼3%，享最高６％回饋。','p'],
+  ['消費類型','海外實體消費','p'],
+  ['必備條件',['電子帳單','單筆需滿NT$1,000'],'ol']
+ ]};
+var perkOpen={};
+function perksHtml(id){
+  var list=PERKS[id]; if(!list) return '';
+  var open=!!perkOpen[id];
+  return '<button type="button" class="perkbtn" data-perk="'+id+'" aria-expanded="'+open+'">'+(open?'收起回饋條件':'回饋條件')+'<span class="chev">'+ic('chev')+'</span></button>'+
+    '<div class="perks"'+(open?'':' hidden')+'>'+list.map(function(r){
+      var body=r[2]==='p'?'<p>'+esc(r[1])+'</p>':r[2]==='ps'?r[1].map(function(x){return '<p>'+esc(x)+'</p>';}).join(''):('<'+r[2]+'>'+r[1].map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</'+r[2]+'>');
+      return '<div class="perk"><h4>'+esc(r[0])+'</h4>'+body+'</div>';
+    }).join('')+'</div>';
+}
+var PAY={
+  kk:{name:'聯邦吉鶴卡',short:'吉鶴卡',c:'#F2A497'},
+  jc:{name:'富邦 J 卡',short:'J卡',c:'#A8D3E6'},
+  card:{name:'刷卡',short:'刷卡',c:'#D5C6EE'},
+  cash:{name:'現金',short:'現金',c:'#B9DAA5'}
+};
+var PAYS={dog:['kk','jc','cash'],koala:['card','cash']};
+var acWho='dog', acSel={dog:'kk',koala:'card'};
+try{ var _aw=localStorage.getItem(LSK+'-acwho'); if(_aw==='koala') acWho='koala'; var _as=JSON.parse(localStorage.getItem(LSK+'-acsel')||'null'); if(_as&&typeof _as==='object'){ if(PAYS.dog.indexOf(_as.dog)>=0) acSel.dog=_as.dog; if(PAYS.koala.indexOf(_as.koala)>=0) acSel.koala=_as.koala; } else { var _ac=localStorage.getItem(LSK+'-accard'); if(_ac==='jc') acSel.dog='jc'; } }catch(e){}
+function fx(){ var f=S.notes&&S.notes.fx; return (f&&f.r>0)?f:FX_DEF; }
+function nt(n){ return 'NT$ '+Math.round(n).toLocaleString('en-US'); }
+function yen(n){ return '¥ '+Math.round(n).toLocaleString('en-US'); }
+function jpyVal(){ var v=String(($('#ac-jpy')||{}).value||'').replace(/[^\d.]/g,''); return parseFloat(v)||0; }
+function expWho(x){ return x.who==='koala'?'koala':'dog'; }
+function expsOf(w){ return itemsOf('exp').filter(function(x){ return expWho(x)===w; }); }
+function acTotals(){ var t={}; CARDS.forEach(function(c){t[c.id]=0;}); expsOf('dog').forEach(function(x){ if(t[x.card]!=null) t[x.card]+=(+x.ntd||0); }); return t; }
+function acConv(){ var el=$('#ac-conv'); if(!el) return; var j=jpyVal(), r=fx().r; el.innerHTML='約 <b>'+nt(j*r)+'</b><small>（¥1 = NT$'+r+'）</small>'; }
+function saveAcPrefs(){ try{ localStorage.setItem(LSK+'-acwho',acWho); localStorage.setItem(LSK+'-acsel',JSON.stringify(acSel)); }catch(e){} }
+function cardTiles(){
+  var tot=acTotals(), r=fx().r;
+  return CARDS.map(function(c){
+    var used=tot[c.id], pct=Math.min(100,used/c.cap*100), left=Math.max(0,c.cap-used), full=used>=c.cap;
+    return '<div class="ccard'+(full?' full':'')+'" style="--cc:'+c.c+';--ct:'+c.t+'"><div class="cc-top"><b>'+esc(c.name)+'</b><span class="cc-pct">'+(pct<10&&pct>0?pct.toFixed(1):Math.floor(pct))+'%</span></div>'+
+      '<div class="cc-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(pct)+'" aria-label="'+esc(c.name)+'已使用"><i style="width:'+pct.toFixed(2)+'%"></i></div>'+
+      '<div class="cc-nums"><span>已刷 '+nt(used)+' / '+nt(c.cap)+'</span></div>'+
+      '<div class="cc-left">'+(full?'回饋額度已用完'+(used>c.cap?'，超出 '+nt(used-c.cap):''):'剩餘 <b>'+nt(left)+'</b><small>約 '+yen(left/r)+'</small>')+'</div>'+perksHtml(c.id)+'</div>';
+  }).join('');
+}
+function sumTile(w){
+  var t={}, all={j:0,n:0}; PAYS[w].forEach(function(k){ t[k]={j:0,n:0}; });
+  expsOf(w).forEach(function(x){ var k=t[x.card]?x.card:(x.card==='cash'?'cash':PAYS[w][0]); t[k].j+=(+x.jpy||0); t[k].n+=(+x.ntd||0); all.j+=(+x.jpy||0); all.n+=(+x.ntd||0); });
+  return '<div class="ccard sumcard"><div class="cc-top"><b>'+WHO[w].em+' 這趟花了</b></div><div class="sum-total"><b>'+yen(all.j)+'</b><span>'+nt(all.n)+'</span></div>'+
+    '<div class="sum-split">'+PAYS[w].map(function(k){ var p=PAY[k], pct=all.n?Math.round(t[k].n/all.n*100):0; return '<div class="sum-row" style="--cc:'+p.c+'"><span class="acr-card">'+esc(p.short)+'</span><span class="sum-bar"><i style="width:'+pct+'%"></i></span><span class="sum-n"><b>'+yen(t[k].j)+'</b><small>'+nt(t[k].n)+'</small></span></div>'; }).join('')+'</div></div>';
+}
+function renderAcct(){
+  if(typeof CARDS==='undefined'||!CARDS) return;
+  var box=$('#ac-cards'); if(!box) return;
+  var w=acWho;
+  $('#ac-who').innerHTML=['koala','dog'].map(function(k){ var n=expsOf(k).length; return '<button type="button" role="tab" data-acwho="'+k+'" aria-selected="'+(k===w)+'"><span class="em">'+WHO[k].em+'</span><span class="pc">'+(n?n+' 筆消費':'還沒有紀錄')+'</span></button>'; }).join('');
+  $('#ac-top').innerHTML=sumTile(w);
+  box.innerHTML=w==='dog'?cardTiles():'';
+  box.hidden=w!=='dog';
+  var sel=acSel[w];
+  $('#ac-pick').className='ac-pick n'+PAYS[w].length;
+  $('#ac-pick').innerHTML=PAYS[w].map(function(k){ var p=PAY[k]; return '<button type="button" role="radio" aria-checked="'+(sel===k)+'" data-accard="'+k+'" style="--cc:'+p.c+'">'+esc(p.name)+'</button>'; }).join('');
+  var ri=$('#ac-rate'); if(ri&&document.activeElement!==ri) ri.value=fx().r;
+  var f=fx(); $('#ac-ratenote').textContent=(S.notes&&S.notes.fx&&S.notes.fx.r>0)?('你在 '+f.d+' 更新'):('預設：台銀 '+f.d+' 掛牌');
+  var dt=$('#ac-date'); if(dt&&!dt.value){ var d=new Date(); dt.value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  acConv();
+  var list=expsOf(w).sort(function(a,b){ return String(b.date||'').localeCompare(String(a.date||''))||(b.ts||0)-(a.ts||0); });
+  var sumJ=0,sumN=0; list.forEach(function(x){ sumJ+=(+x.jpy||0); sumN+=(+x.ntd||0); });
+  $('#ac-listh').textContent=WHO[w].em+' 的消費紀錄';
+  $('#ac-sum').textContent=list.length?('共 '+list.length+' 筆・'+yen(sumJ)+'・'+nt(sumN)):'';
+  $('#ac-list').innerHTML=list.length?'<div class="aclist">'+list.map(function(x){ var p=PAY[x.card]||PAY.card;
+    return '<div class="acr" style="--cc:'+p.c+'"><span class="acr-card">'+esc(p.short)+'</span><div class="acr-main"><b>'+(x.note?esc(x.note):(x.card==='cash'?'現金消費':'刷卡'))+'</b><small>'+esc(fmtDate(x.date))+'・¥1 = NT$'+x.rate+'</small></div><div class="acr-amt"><b>'+yen(x.jpy)+'</b><small>'+nt(x.ntd)+'</small></div><button type="button" class="mini danger" data-del="'+x.id+'" aria-label="刪除這筆">'+ic('trash')+'<span>刪除</span></button></div>';
+  }).join('')+'</div>':'<div class="empty"><b>'+WHO[w].em+' 還沒有消費紀錄</b>上面選付款方式、輸入日幣金額，按「新增這筆」就會記下來。</div>';
+}
+document.addEventListener('input',function(e){
+  var t=e.target; if(!t) return;
+  if(t.id==='ac-jpy'){ var raw=t.value.replace(/[^\d]/g,''); t.value=raw?Number(raw).toLocaleString('en-US'):''; acConv(); }
+  if(t.id==='ac-rate'){ var v=parseFloat(t.value); if(v>0.05&&v<1){ var d=new Date(); S.notes.fx={r:Math.round(v*10000)/10000,d:(d.getMonth()+1)+'/'+d.getDate()}; queueNotes(); acConv(); var n=$('#ac-ratenote'); if(n) n.textContent='你在 '+S.notes.fx.d+' 更新'; } }
+});
+document.addEventListener('click',function(e){
+  var pb=e.target.closest&&e.target.closest('[data-perk]');
+  if(pb){ var pid=pb.getAttribute('data-perk'); perkOpen[pid]=!perkOpen[pid]; var pn=pb.nextElementSibling; pn.hidden=!perkOpen[pid]; pb.setAttribute('aria-expanded',String(!!perkOpen[pid])); pb.firstChild.textContent=perkOpen[pid]?'收起回饋條件':'回饋條件'; return; }
+  var b=e.target.closest&&e.target.closest('[data-accard],[data-acwho],#ac-add'); if(!b) return;
+  if(b.hasAttribute('data-acwho')){ acWho=b.getAttribute('data-acwho'); saveAcPrefs(); renderAcct(); return; }
+  if(b.hasAttribute('data-accard')){ acSel[acWho]=b.getAttribute('data-accard'); saveAcPrefs(); renderAcct(); return; }
+  var j=jpyVal(); if(!(j>0)){ toast('請輸入日幣金額'); $('#ac-jpy').focus(); return; }
+  var w=acWho, k=acSel[w], r=fx().r, rec={id:uid8('exp'),kind:'exp',who:w,card:k,jpy:Math.round(j),rate:r,ntd:Math.round(j*r),date:$('#ac-date').value,note:val('#ac-note'),ts:Date.now()};
+  var c=CARDS.filter(function(x){return x.id===k;})[0];
+  saveItem(rec).then(function(){ $('#ac-jpy').value=''; $('#ac-note').value=''; renderAcct(); if(c){ var left=c.cap-acTotals()[c.id]; toast(left>=0?(c.name+' 已記一筆，剩餘 '+nt(left)):(c.name+' 已超過回饋額度')); } else toast(WHO[w].em+' 已記一筆'+PAY[k].name+' '+yen(rec.jpy)); });
+  renderAcct();
+});
+renderAcct();
 })();
 
 /* ---------- 首頁插圖：時間與互動 ---------- */
