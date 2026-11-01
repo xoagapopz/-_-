@@ -871,6 +871,16 @@ button,input,select,textarea{font-family:inherit}
 
 .wacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:2px}
 .wacts .mini{display:flex;align-items:center;justify-content:center;min-width:0;padding:7px 4px;font-size:12.5px;white-space:nowrap;text-align:center;text-decoration:none;color:#3E3A39}
+
+.tkcard{position:relative;-webkit-touch-callout:none;transition:transform .15s ease,box-shadow .15s ease}
+.tkcard.pressing{transform:scale(.98);box-shadow:0 0 0 3px #F6D27A}
+.lphint{font-size:11px;font-weight:400;color:#6E6663;margin-left:8px;white-space:nowrap}
+.tki .lphint{align-self:flex-end;margin:0}
+.tkeform select{width:100%;padding:9px 11px;border-radius:10px;border:2px solid #3E3A39;background:#FFFCF6;font-size:15px;color:#3E3A39}
+.tke-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.tke-row input{min-width:0;box-sizing:border-box;-webkit-appearance:none;appearance:none;height:44px}
+.tke-media{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.tke-media img{max-width:140px;max-height:140px;border:2px solid #3E3A39;border-radius:12px}
 </style>
 
 
@@ -1153,7 +1163,7 @@ button,input,select,textarea{font-family:inherit}
       <div class="who2" id="who2" role="tablist"></div>
       <div id="pack"></div>
     </section>
-    <p class="appver">版本 10/31-l</p>
+    <p class="appver">版本 11/2-a</p>
   </main>
 </div>
 
@@ -1797,7 +1807,7 @@ function tkHtml(it){
   ['koala','dog'].forEach(function(w){
     var key=it.id+'|'+w, list=tkOf(it.id,w);
     var rows=list.map(function(k){
-      return '<div class="tki">'+whoTag(k)+(k.note?'<p>'+esc(k.note)+'</p>':'')+(k.img?'<img class="thumb" data-lb="'+k.id+'" src="'+k.img+'" alt="門票圖片">':'')+fileBtn(k)+
+      return '<div class="tki tkcard" data-tklp="'+k.id+'"><small class="lphint">長按編輯</small>'+whoTag(k)+(k.note?'<p>'+esc(k.note)+'</p>':'')+(k.img?'<img class="thumb" data-lb="'+k.id+'" src="'+k.img+'" alt="門票圖片">':'')+fileBtn(k)+
         '<div class="acts">'+(k.note?'<button type="button" class="mini" data-copy="'+esc(k.note)+'">'+ic('copy')+'複製文字</button>':'')+'<button type="button" class="mini danger" data-del="'+k.id+'">'+ic('trash')+'<span>刪除</span></button></div></div>';
     }).join('');
     var pv=pendTk[key];
@@ -2281,7 +2291,7 @@ function openSheet(id){
     '<div class="acts">'+(f.pnr?'<button type="button" class="mini" data-copy="'+esc(f.pnr)+'">'+ic('copy')+'複製訂位代號</button>':'')+'<button type="button" class="mini" data-fedit="'+f.id+'">'+ic('pencil')+'編輯</button><button type="button" class="mini danger" data-del="'+f.id+'">'+ic('trash')+'<span>刪除</span></button></div>';
   $('#sheet').hidden=false;
 }
-function closeSheet(){ usjOpen=false; usjEd=null; sheetId=null; routeLeg=null; $('#sheet').hidden=true; }
+function closeSheet(){ tkEd=null; usjOpen=false; usjEd=null; sheetId=null; routeLeg=null; $('#sheet').hidden=true; }
 function startEditFlight(id){
   var f=S.items[id]; if(!f) return; closeSheet(); editFlight=id; openForm('flight');
   $('#f-dir').value=f.dir||'去程'; $('#f-date').value=f.date||''; $('#f-air').value=f.air||''; $('#f-no').value=f.no||'';
@@ -2412,6 +2422,68 @@ function renderCoupons(){
 }
 var whoTk='koala';
 try{ var _tw=localStorage.getItem(LSK+'-tkwho'); if(_tw==='dog') whoTk='dog'; }catch(e){}
+/* ---------- 門票：長按編輯 ---------- */
+var tkEd=null;
+function tkEditHtml(){
+  var e=tkEd, k=S.items[e.id]; if(!k) return '';
+  var opt=function(v,t){ return '<option value="'+v+'"'+((e.who||'both')===v?' selected':'')+'>'+t+'</option>'; };
+  var img=e.img?'<div class="tke-media"><img src="'+e.img+'" alt="門票圖片"><button type="button" class="mini danger" data-tkerm="img">'+ic('trash')+'<span>移除圖片</span></button></div>':'';
+  var pdfName=e.newPdf?e.newPdf.name:(e.pdf&&!e.dropPdf?e.pdf.name:'');
+  var pdf=pdfName?'<div class="tke-media"><span class="pdfsel">'+ic('file')+esc(pdfName)+'</span><button type="button" class="mini danger" data-tkerm="pdf">'+ic('trash')+'<span>移除 PDF</span></button></div>':'';
+  return '<div class="sh-head"><b>'+ic('pencil')+' 編輯門票</b><button type="button" class="mini" data-sclose="1">'+ic('x')+'關閉</button></div>'+
+    '<div class="usjform tkeform">'+
+    '<label>這張是誰的<select id="tke-who">'+opt('koala','🐨')+opt('dog','🐶')+opt('both','兩人共用')+'</select></label>'+
+    '<label>門票名稱<input id="tke-title" type="text" value="'+esc(e.title||'')+'"></label>'+
+    '<div class="tke-row"><label>使用日期<input id="tke-date" type="date" value="'+esc(e.date||'')+'"></label><label>入場時間<input id="tke-time" type="text" value="'+esc(e.time||'')+'" placeholder="例：10:00"></label></div>'+
+    '<div class="tke-row"><label>張數或票種<input id="tke-qty" type="text" value="'+esc(e.qty||'')+'"></label><label>票號／訂單編號<input id="tke-no" type="text" value="'+esc(e.no||'')+'"></label></div>'+
+    '<label>文字／備註<textarea id="tke-note" rows="4">'+esc(e.note||'')+'</textarea></label>'+
+    '<div class="ug-imgs"><div class="ug-h">圖片與 PDF</div>'+img+pdf+
+    '<label class="jr-add ugadd">'+ic('plus')+(e.img||pdfName?'更換圖片或 PDF':'加入圖片或 PDF')+'<input type="file" accept="image/*,application/pdf,.pdf" id="tke-file" data-tkefile="1"></label></div>'+
+    '<div class="fbtns"><button type="button" class="btn shu sm" id="tke-save">儲存</button><button type="button" class="btn ghost sm" style="color:var(--ink)" data-sclose="1">取消</button></div></div>';
+}
+function tkSync(){ if(!tkEd) return; var g=function(id){ var el=document.getElementById(id); return el?el.value:''; }; tkEd.who=g('tke-who'); tkEd.title=g('tke-title'); tkEd.date=g('tke-date'); tkEd.time=g('tke-time'); tkEd.qty=g('tke-qty'); tkEd.no=g('tke-no'); tkEd.note=g('tke-note'); }
+function renderTkEdit(){ if(!tkEd) return; $('#sheet-in').innerHTML=tkEditHtml(); $('#sheet-in').setAttribute('aria-label','編輯門票'); $('#sheet').hidden=false; }
+function openTkEdit(id){
+  var k=S.items[id]; if(!k||k.kind!=='ticket') return;
+  usjOpen=false; usjEd=null; sheetId=null; routeLeg=null;
+  tkEd={id:id,who:k.who||'both',title:k.title||'',date:k.date||'',time:k.time||'',qty:k.qty||'',no:k.no||'',note:k.note||'',img:k.img||'',pdf:k.pdf||null,newPdf:null,dropPdf:false};
+  renderTkEdit(); $('#sheet-in').scrollTop=0;
+}
+(function(){
+  var timer=null, sx=0, sy=0, fired=false;
+  function clear(){ clearTimeout(timer); timer=null; var b=document.querySelector('.tkcard.pressing'); if(b) b.classList.remove('pressing'); }
+  document.addEventListener('pointerdown',function(e){
+    var b=e.target.closest&&e.target.closest('[data-tklp]'); if(!b) return;
+    if(e.target.closest('input,textarea,select')) return;
+    fired=false; sx=e.clientX; sy=e.clientY; b.classList.add('pressing');
+    timer=setTimeout(function(){ timer=null; b.classList.remove('pressing'); fired=true; if(navigator.vibrate){ try{ navigator.vibrate(15); }catch(x){} } openTkEdit(b.getAttribute('data-tklp')); },500);
+  });
+  document.addEventListener('pointermove',function(e){ if(timer&&Math.hypot(e.clientX-sx,e.clientY-sy)>10) clear(); });
+  document.addEventListener('pointerup',clear); document.addEventListener('pointercancel',clear);
+  document.addEventListener('click',function(e){ if(fired){ fired=false; if(e.target.closest&&e.target.closest('[data-tklp]')){ e.preventDefault(); e.stopPropagation(); } } },true);
+  document.addEventListener('contextmenu',function(e){ if(e.target.closest&&e.target.closest('[data-tklp]')) e.preventDefault(); });
+  document.addEventListener('click',function(e){
+    var t=e.target.closest&&e.target.closest('[data-tkerm],#tke-save'); if(!t||!tkEd) return;
+    e.stopPropagation(); tkSync();
+    if(t.hasAttribute('data-tkerm')){ var w=t.getAttribute('data-tkerm'); if(w==='img') tkEd.img=''; else { tkEd.newPdf=null; tkEd.dropPdf=true; } renderTkEdit(); return; }
+    var ed=tkEd, old=S.items[ed.id]; if(!old) return;
+    if(!(ed.title||'').trim()){ toast('門票名稱不能空白'); return; }
+    t.disabled=true;
+    var rec=Object.assign({},old,{who:ed.who,title:ed.title.trim(),date:ed.date,time:ed.time.trim(),qty:ed.qty.trim(),no:ed.no.trim(),note:ed.note.trim(),img:ed.img||''});
+    var oldPdf=old.pdf, chain=Promise.resolve();
+    if(ed.newPdf){ chain=savePdf(ed.newPdf).then(function(pd){ rec.pdf=pd; }); }
+    else if(ed.dropPdf){ delete rec.pdf; }
+    chain.then(function(){ return saveItem(rec); }).then(function(){
+      if(oldPdf&&oldPdf.fid&&(ed.newPdf||ed.dropPdf)) itemsOf('chunk').filter(function(c){return c.fid===oldPdf.fid;}).forEach(function(c){ delItem(c.id); });
+      closeSheet(); renderTickets(); renderDay(); toast('門票已更新');
+    },function(){ t.disabled=false; toast('存不下這個檔案，請換小一點的 PDF'); });
+  },true);
+  document.addEventListener('change',function(e){
+    var t=e.target; if(!t||!t.hasAttribute||!t.hasAttribute('data-tkefile')||!tkEd) return;
+    var f=t.files&&t.files[0]; if(!f) return; tkSync();
+    readTicketFile(f).then(function(r){ if(!r||!tkEd) return; if(r.img) tkEd.img=r.img; else { tkEd.newPdf=r.pdf; tkEd.dropPdf=false; } renderTkEdit(); });
+  });
+})();
 function renderTickets(){
   var all=itemsOf('ticket');
   $('#tk-who').innerHTML=['koala','dog'].map(function(w){ var n=all.filter(function(k){return tkFor(k,w);}).length; return '<button type="button" role="tab" data-tkwho="'+w+'" aria-selected="'+(w===whoTk)+'"><span class="em">'+WHO[w].em+'</span><span class="pc">'+n+' 張門票</span></button>'; }).join('');
@@ -2421,7 +2493,7 @@ function renderTickets(){
   });
   $('#tickets').innerHTML=list.length?list.map(function(k){
     var fi=k.ref&&findItem(k.ref);
-    return '<div class="cp'+(k.used?' used':'')+'"><h3>'+esc(k.title)+'</h3><div class="meta">'+whoTag(k)+(k.date?'<span>'+esc(fmtDate(k.date))+'</span>':'')+(k.time?'<span>入場 '+esc(k.time)+'</span>':'')+(k.qty?'<span>'+esc(k.qty)+'</span>':'')+(fi?'<span class="man">第 '+fi[0].n+' 天行程</span>':'')+(k.used?'<span>已使用</span>':'')+'</div>'+
+    return '<div class="cp tkcard'+(k.used?' used':'')+'" data-tklp="'+k.id+'"><h3>'+esc(k.title)+'<small class="lphint">長按編輯</small></h3><div class="meta">'+whoTag(k)+(k.date?'<span>'+esc(fmtDate(k.date))+'</span>':'')+(k.time?'<span>入場 '+esc(k.time)+'</span>':'')+(k.qty?'<span>'+esc(k.qty)+'</span>':'')+(fi?'<span class="man">第 '+fi[0].n+' 天行程</span>':'')+(k.used?'<span>已使用</span>':'')+'</div>'+
       (k.no?'<div class="code">'+esc(k.no)+'</div>':'')+
       (k.note?'<div style="font-size:13px;color:var(--ink2);white-space:pre-wrap;margin-top:6px">'+esc(k.note)+'</div>':'')+
       (k.img?'<img class="thumb" data-lb="'+k.id+'" src="'+k.img+'" alt="門票圖片">':'')+fileBtn(k)+
